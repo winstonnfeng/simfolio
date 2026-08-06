@@ -24,10 +24,11 @@ const TRADABLE_TICKER = /^[A-Z0-9]{1,6}(\.[A-Z]{1,2})?$/;
  * HistoryProvider.
  */
 export class FinnhubQuoteProvider {
-  constructor({ apiKey, fetchImpl = fetch.bind(globalThis), exchanges = DEFAULT_EXCHANGES }) {
+  constructor({ apiKey, fetchImpl = fetch.bind(globalThis), exchanges = DEFAULT_EXCHANGES, logger = console }) {
     this.apiKey = apiKey;
     this.fetch = fetchImpl;
     this.exchanges = exchanges;
+    this.logger = logger;
   }
 
   async _get(path, params = {}) {
@@ -44,31 +45,28 @@ export class FinnhubQuoteProvider {
   }
 
   /**
-   * The full tradable universe across every configured exchange, used to build
-   * the searchable symbol table. Fetched one exchange at a time so a single
-   * request never blows the free-tier rate limit.
+   * An exchange that refuses is skipped rather than fatal: Finnhub's free tier
+   * serves the US list but charges for TSX, and a US-only universe is a much
+   * better outcome than no universe at all.
    */
   async listSymbols() {
     const universe = new Map();
+    const skipped = [];
+
     for (const exchange of this.exchanges) {
-      const rows = await this._get('/stock/symbol', { exchange: exchange.code });
-      for (const instrument of this._toInstruments(rows, exchange)) {
-        if (!universe.has(instrument.symbol)) universe.set(instrument.symbol, instrument);
+      try {
+        const rows = await this._get('/stock/symbol', { exchange: exchange.code });
+        for (const instrument of this._toInstruments(rows, exchange)) {
+          if (!universe.has(instrument.symbol)) universe.set(instrument.symbol, instrument);
+        }
+      } catch (error) {
+        skipped.push(`${exchange.code} (${error.message})`);
       }
     }
-    return [...universe.values()];
-  }
 
-  _toInstruments(rows, exchange) {
-    return (rows ?? [])
-      .filter((row) => row.symbol && row.type !== 'Bond' && TRADABLE_TICKER.test(row.symbol))
-      .map((row) => ({
-        symbol: row.symbol,
-        name: row.description ?? row.symbol,
-        kind: row.type === 'ETP' ? 'ETF' : 'Stock',
-        exchange: row.mic ?? exchange.code,
-        market: exchange.market,
-      }));
+    if (universe.size === 0) throw new Error(`No exchange could be listed — ${skipped.join('; ')}`);
+    if (skipped.length > 0) this.logger.warn(`[finnhub] skipped: ${skipped.join('; ')}`);
+    return [...universe.values()];
   }
 
   /**
