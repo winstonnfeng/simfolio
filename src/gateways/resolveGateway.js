@@ -1,7 +1,7 @@
 import { LocalTradingGateway } from './LocalTradingGateway.js';
 import { RemoteTradingGateway } from './RemoteTradingGateway.js';
 
-const DEFAULT_BASE_URL = 'http://localhost:4000';
+const DEFAULT_BASE_URL = 'https://simfolio-api.onrender.com';
 
 /**
  * Chooses an adapter at boot: the API when /health answers, otherwise the
