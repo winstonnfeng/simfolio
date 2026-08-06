@@ -181,6 +181,7 @@
                 <path d="{{ portfolioArea }}" fill="rgba(245,245,247,0.09)" style="opacity: {{ areaOpacity }};"></path>
                 <path d="{{ portfolioPath }}" fill="none" stroke="#f5f5f7" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
               </svg>
+              <div style="min-height: 16px; margin-top: 6px; font-size: 12px; color: rgba(245,245,247,0.4);">{{ portfolioChartNote }}</div>
             </div>
           </div>
 
@@ -314,6 +315,7 @@
               <path d="{{ stockArea }}" fill="{{ stockFill }}" style="opacity: {{ areaOpacity }};"></path>
               <path d="{{ stockPath }}" fill="none" stroke="{{ stockLineInk }}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
             </svg>
+            <div style="min-height: 16px; margin-top: 6px; font-size: 12px; color: rgba(245,245,247,0.4);">{{ stockChartNote }}</div>
 
             <div data-pt="stat-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(245,245,247,0.09); border-radius: 18px; overflow: hidden; margin-top: 22px;">
               <sc-for list="{{ stats }}" as="s" hint-placeholder-count="6">
@@ -448,13 +450,16 @@
 </div>
 </sc-if>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;apiBaseUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;https://simfolio-api.onrender.com&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Backend&quot;},&quot;startingCash&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:100000,&quot;min&quot;:1000,&quot;max&quot;:1000000,&quot;step&quot;:1000,&quot;unit&quot;:&quot;$&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;livePrices&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Market data&quot;},&quot;chartStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Area&quot;,&quot;options&quot;:[&quot;Area&quot;,&quot;Line&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Market data&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;apiBaseUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;http://localhost:4000&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Backend&quot;},&quot;startingCash&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:100000,&quot;min&quot;:1000,&quot;max&quot;:1000000,&quot;step&quot;:1000,&quot;unit&quot;:&quot;$&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;livePrices&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Market data&quot;},&quot;chartStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Area&quot;,&quot;options&quot;:[&quot;Area&quot;,&quot;Line&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Market data&quot;}}">
 /**
  * ViewModel. Owns screen state and talks to a single TradingGateway port
  * (src/gateways/TradingGateway.js) — the same code path whether the Express API
  * is running or the in-browser adapter is standing in for it. No business rules
  * here: trade validity, valuation and pricing all belong to the gateway/domain.
  */
+/** Give up on a symbol+range after this many failed history fetches. */
+const MAX_SERIES_ATTEMPTS = 6;
+
 class Component extends DCLogic {
   state = {
     ready: false,
@@ -484,6 +489,8 @@ class Component extends DCLogic {
 
   series = new Map();
   pendingSeries = new Set();
+  seriesRetryAt = new Map();
+  seriesAttempts = new Map();
   meta = new Map();
   pendingMeta = new Set();
 
@@ -605,22 +612,102 @@ class Component extends DCLogic {
     }, 220);
   }
 
-  /** Cached price history. Returns [] on the first call and re-renders once loaded. */
+  /**
+   * Cached price history. Returns [] on the first call and re-renders once
+   * loaded.
+   *
+   * A failure is never cached as an empty chart: the vendor's free tier
+   * rate-limits at a handful of requests per minute, and flipping between
+   * ranges trips it easily. Failed keys back off and retry on a timer instead,
+   * so the chart fills in a few seconds later rather than staying blank for the
+   * rest of the session.
+   */
   _seriesFor(symbol, range) {
     const key = `${symbol}:${range}`;
     if (this.series.has(key)) return this.series.get(key);
-    if (!this.pendingSeries.has(key)) {
-      this.pendingSeries.add(key);
-      this.gateway
-        .getSeries(symbol, range)
-        .then((values) => {
+    if (this.pendingSeries.has(key)) return [];
+    if (Date.now() < (this.seriesRetryAt.get(key) ?? 0)) return [];
+
+    this.pendingSeries.add(key);
+    this.gateway
+      .getSeries(symbol, range)
+      .then((values) => {
+        if (Array.isArray(values) && values.length > 1) {
           this.series.set(key, values);
-          this.forceUpdate();
-        })
-        .catch(() => this.series.set(key, []))
-        .finally(() => this.pendingSeries.delete(key));
-    }
+          this.seriesAttempts.delete(key);
+          this.seriesRetryAt.delete(key);
+        } else {
+          this._retrySeriesLater(key);
+        }
+      })
+      .catch(() => this._retrySeriesLater(key))
+      .finally(() => {
+        this.pendingSeries.delete(key);
+        this.forceUpdate();
+      });
     return [];
+  }
+
+  /**
+   * Linear back-off, capped, with a timer so the retry actually happens.
+   *
+   * After the last attempt the key is cached as a genuine empty series. That
+   * cache entry is the terminal state: `_seriesFor` short-circuits on it, so
+   * giving up stops the fetching completely rather than falling through the
+   * expiry guard and refetching on every render.
+   */
+  _retrySeriesLater(key) {
+    const attempts = (this.seriesAttempts.get(key) ?? 0) + 1;
+    this.seriesAttempts.set(key, attempts);
+
+    if (attempts >= MAX_SERIES_ATTEMPTS) {
+      this.series.set(key, []);
+      this.seriesRetryAt.delete(key);
+      return;
+    }
+
+    const delay = Math.min(30_000, 2_500 * attempts);
+    this.seriesRetryAt.set(key, Date.now() + delay);
+    const timer = setTimeout(() => this.forceUpdate(), delay + 50);
+    timer.unref?.();
+  }
+
+  /** Empty chart plus attempts remaining means "wait"; exhausted means "no data". */
+  _seriesLoading(symbol, range) {
+    const key = `${symbol}:${range}`;
+    if (this.series.has(key)) return false;
+    return this.pendingSeries.has(key) || (this.seriesAttempts.get(key) ?? 0) < MAX_SERIES_ATTEMPTS;
+  }
+
+  /**
+   * Re-prices the server's portfolio snapshot against the live quote stream.
+   * Without this the totals freeze at whatever they were when the page loaded —
+   * the quotes update, but nothing re-values the positions holding them.
+   */
+  _livePortfolio(portfolio) {
+    const positions = portfolio.positions.map((position) => {
+      const price = this._quote(position.symbol)?.price ?? position.price;
+      const value = position.qty * price;
+      const cost = position.qty * position.avgCost;
+      const unrealized = value - cost;
+      return { ...position, price, value, unrealized, unrealizedPct: cost ? (unrealized / cost) * 100 : 0 };
+    });
+
+    const invested = positions.reduce((sum, p) => sum + p.value, 0);
+    const cost = positions.reduce((sum, p) => sum + p.qty * p.avgCost, 0);
+    const total = invested + portfolio.cash;
+    const totalReturn = total - portfolio.deposited;
+
+    return {
+      ...portfolio,
+      positions,
+      invested,
+      total,
+      totalReturn,
+      totalReturnPct: portfolio.deposited ? (totalReturn / portfolio.deposited) * 100 : 0,
+      unrealized: invested - cost,
+      unrealizedPct: cost ? ((invested - cost) / cost) * 100 : 0,
+    };
   }
 
   /**
@@ -702,7 +789,7 @@ class Component extends DCLogic {
     }
 
     const fmt = this.fmt;
-    const portfolio = state.portfolio;
+    const portfolio = this._livePortfolio(state.portfolio);
     const instrument = this._metaFor(state.symbol);
     const quote = this._quote(instrument.symbol);
     const price = this._priceOf(instrument.symbol);
@@ -810,6 +897,12 @@ class Component extends DCLogic {
 
       portfolioPath: this.chart.toPath(portfolioSeries, 900, 200, 10),
       portfolioArea: this.chart.toAreaPath(portfolioSeries, 900, 200, 10),
+      portfolioChartNote:
+        portfolioSeries.length > 1
+          ? ''
+          : portfolio.positions.length === 0
+          ? 'Buy something and your portfolio history appears here.'
+          : 'Loading history…',
 
       ranges: ['1D', '1W', '1M', '3M', '1Y', '5Y'].map((id) => ({
         label: id,
@@ -861,6 +954,12 @@ class Component extends DCLogic {
       stockPath: this.chart.toPath(stockSeries, 900, 240, 12),
       stockArea: this.chart.toAreaPath(stockSeries, 900, 240, 12),
       stockLineInk: stockUp ? gain : loss,
+      stockChartNote:
+        stockSeries.length > 1
+          ? ''
+          : this._seriesLoading(instrument.symbol, state.range)
+          ? 'Loading ' + state.range + ' history…'
+          : 'No ' + state.range + ' history available for this listing.',
       stockFill: stockUp ? 'rgba(48,209,88,0.12)' : 'rgba(255,69,58,0.12)',
       stats: [
         { label: 'Market cap', value: instrument.mktCap ? fmt.compact(instrument.mktCap) : '—' },
