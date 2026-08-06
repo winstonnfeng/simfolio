@@ -19,9 +19,8 @@ const TRADABLE_TICKER = /^[A-Z0-9]{1,6}(\.[A-Z]{1,2})?$/;
 
 /**
  * Finnhub adapter for everything its free tier covers: real-time quotes,
- * symbol search, the US and Canadian symbol universes, company profiles and
- * metrics. Historical candles are premium there, so they come from a
- * HistoryProvider.
+ * symbol search, the symbol universe, company profiles and metrics. Historical
+ * candles are premium there, so they come from a HistoryProvider.
  */
 export class FinnhubQuoteProvider {
   constructor({ apiKey, fetchImpl = fetch.bind(globalThis), exchanges = DEFAULT_EXCHANGES, logger = console }) {
@@ -45,9 +44,12 @@ export class FinnhubQuoteProvider {
   }
 
   /**
-   * An exchange that refuses is skipped rather than fatal: Finnhub's free tier
-   * serves the US list but charges for TSX, and a US-only universe is a much
-   * better outcome than no universe at all.
+   * The tradable universe, used to build the searchable symbol table. Fetched
+   * one exchange at a time so a single request never blows the free-tier rate
+   * limit, and an exchange that refuses is skipped rather than fatal: the free
+   * tier serves the US list but charges for TSX, and a US-only universe beats
+   * no universe at all. Search still reaches Canadian listings, because
+   * /search is not exchange-gated.
    */
   async listSymbols() {
     const universe = new Map();
@@ -67,6 +69,18 @@ export class FinnhubQuoteProvider {
     if (universe.size === 0) throw new Error(`No exchange could be listed — ${skipped.join('; ')}`);
     if (skipped.length > 0) this.logger.warn(`[finnhub] skipped: ${skipped.join('; ')}`);
     return [...universe.values()];
+  }
+
+  _toInstruments(rows, exchange) {
+    return (rows ?? [])
+      .filter((row) => row.symbol && row.type !== 'Bond' && TRADABLE_TICKER.test(row.symbol))
+      .map((row) => ({
+        symbol: row.symbol,
+        name: row.description ?? row.symbol,
+        kind: row.type === 'ETP' ? 'ETF' : 'Stock',
+        exchange: row.mic ?? exchange.code,
+        market: exchange.market,
+      }));
   }
 
   /**
