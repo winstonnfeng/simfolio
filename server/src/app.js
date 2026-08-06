@@ -16,8 +16,11 @@ import { streamRoutes } from './interfaces/http/routes/streamRoutes.js';
  * is a pure function of (config, ports, useCases), so a test can mount it over
  * fakes without a database, a vendor key, or a listening socket.
  *
- * Each router is handed only the collaborators it uses rather than the whole
- * container: the dependency list at each call site is the router's contract.
+ * Mount order matters. The portfolio router sits on the bare `/api` prefix and
+ * applies bearer auth to everything entering it, so every more specific path
+ * must be registered BEFORE it — otherwise a public request like
+ * /api/market/instruments is rejected for having no token before it ever
+ * reaches the market router.
  */
 export function createApp({ config, ports, useCases }) {
   const app = express();
@@ -39,17 +42,6 @@ export function createApp({ config, ports, useCases }) {
   );
 
   app.use(
-    '/api',
-    portfolioRoutes({
-      getPortfolio: useCases.getPortfolio,
-      placeOrder: useCases.placeOrder,
-      depositCash: useCases.depositCash,
-      listTransactions: useCases.listTransactions,
-      authenticate,
-    })
-  );
-
-  app.use(
     '/api/market',
     marketRoutes({
       getMarketData: useCases.getMarketData,
@@ -62,6 +54,18 @@ export function createApp({ config, ports, useCases }) {
 
   // SSE authenticates from a query parameter, so it sits outside the bearer middleware.
   app.get('/api/stream/quotes', streamRoutes({ broadcaster: ports.broadcaster, tokens: ports.tokens }));
+
+  // Last: this one guards the whole /api prefix.
+  app.use(
+    '/api',
+    portfolioRoutes({
+      getPortfolio: useCases.getPortfolio,
+      placeOrder: useCases.placeOrder,
+      depositCash: useCases.depositCash,
+      listTransactions: useCases.listTransactions,
+      authenticate,
+    })
+  );
 
   app.use(notFoundHandler);
   app.use(errorHandler);
