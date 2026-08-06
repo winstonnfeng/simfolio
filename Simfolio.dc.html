@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; background: #08080a; }
+  body { font-family: 'Manrope', Helvetica, sans-serif; color: #f5f5f7; -webkit-font-smoothing: antialiased; }
+  a { color: #f5f5f7; text-decoration: none; }
+  a:hover { color: #ffffff; }
+  * { box-sizing: border-box; }
+  input, button, select, textarea { font-family: inherit; }
+  input::placeholder, textarea::placeholder { color: rgba(245,245,247,0.34); }
+  [data-pt="scroll"]::-webkit-scrollbar { width: 8px; }
+  [data-pt="scroll"]::-webkit-scrollbar-thumb { background: rgba(245,245,247,0.16); border-radius: 8px; }
+  @keyframes pt-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 1080px) {
+    [data-pt="grid-hero"] { grid-template-columns: 1fr !important; }
+    [data-pt="grid-two"] { grid-template-columns: 1fr !important; }
+    [data-pt="grid-stock"] { grid-template-columns: 1fr !important; }
+    [data-pt="auth-split"] { grid-template-columns: 1fr !important; }
+    [data-pt="auth-aside"] { display: none !important; }
+  }
+  @media (max-width: 760px) {
+    [data-pt="shell"] { margin: 8px !important; border-radius: 22px !important; }
+    [data-pt="body"] { flex-direction: column !important; padding: 16px !important; gap: 16px !important; }
+    [data-pt="rail"] { position: static !important; flex-direction: row !important; width: auto !important; height: auto !important; justify-content: flex-start !important; align-items: center !important; }
+    [data-pt="rail-offset"] { display: none !important; }
+    [data-pt="pill"] { flex-direction: row !important; }
+    [data-pt="rail-spacer"] { display: none !important; }
+    [data-pt="rail-foot"] { flex-direction: row !important; margin-left: auto !important; }
+    [data-pt="topbar"] { flex-direction: column !important; align-items: stretch !important; gap: 14px !important; }
+    [data-pt="search"] { width: 100% !important; }
+    [data-pt="stat-grid"] { grid-template-columns: repeat(2, 1fr) !important; }
+    [data-pt="bignum"] { font-size: 38px !important; }
+  }
+</style>
+</helmet>
+
+<sc-if value="{{ onAuth }}" hint-placeholder-val="{{ true }}">
+<main data-screen-label="Sign in" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;">
+  <div data-pt="auth-split" style="width: min(1000px, 100%); display: grid; grid-template-columns: 1.05fr 1fr; background: #131315; border: 1px solid rgba(245,245,247,0.08); border-radius: 28px; overflow: hidden; box-shadow: 0 30px 70px rgba(0,0,0,0.6);">
+    <aside data-pt="auth-aside" style="background: #08080a; color: #f5f5f7; padding: 44px 40px; display: flex; flex-direction: column; gap: 28px; border-right: 1px solid rgba(245,245,247,0.08);">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="display: block; width: 26px; height: 26px; border-radius: 9px; background: #f5f5f7;"></span>
+        <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.01em;">Simfolio</span>
+      </div>
+      <div style="margin-top: auto;">
+        <h1 style="font-size: 38px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.08; margin: 0 0 14px;">Learn the market<br>without the risk.</h1>
+        <p style="font-size: 15px; line-height: 1.6; color: rgba(245,245,247,0.55); margin: 0; max-width: 320px;">Real-time prices, a real portfolio, entirely fake money. Build the habit before you build the position.</p>
+      </div>
+      <div style="display: flex; gap: 28px; border-top: 1px solid rgba(245,245,247,0.12); padding-top: 22px;">
+        <div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 500;">$100K</div>
+          <div style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,245,247,0.42); margin-top: 4px;">Starting cash</div>
+        </div>
+        <div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 500;">US + CA</div>
+          <div style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,245,247,0.42); margin-top: 4px;">Markets covered</div>
+        </div>
+      </div>
+    </aside>
+
+    <section style="padding: 44px 40px; display: flex; flex-direction: column; justify-content: center;">
+      <div style="display: flex; gap: 4px; background: rgba(245,245,247,0.06); border-radius: 14px; padding: 4px; margin-bottom: 28px;">
+        <button onClick="{{ showLogin }}" style="flex: 1; border: none; border-radius: 11px; padding: 10px 0; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.22s ease, color 0.22s ease; background: {{ loginTabBg }}; color: {{ loginTabColor }};">Log in</button>
+        <button onClick="{{ showRegister }}" style="flex: 1; border: none; border-radius: 11px; padding: 10px 0; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.22s ease, color 0.22s ease; background: {{ registerTabBg }}; color: {{ registerTabColor }};">Register</button>
+      </div>
+
+      <h2 style="font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px;">{{ authTitle }}</h2>
+      <p style="font-size: 14px; color: rgba(245,245,247,0.55); margin: 0 0 24px; line-height: 1.5;">{{ authSubtitle }}</p>
+
+      <form onSubmit="{{ submitAuth }}" style="display: flex; flex-direction: column; gap: 14px;">
+        <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}">
+          <label style="display: flex; flex-direction: column; gap: 7px; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,245,247,0.45);">Full name
+            <input name="name" type="text" autoComplete="name" placeholder="Amanda Chen" style="border: 1px solid rgba(245,245,247,0.12); background: #1b1b1e; border-radius: 14px; padding: 14px 16px; font-size: 15px; color: #f5f5f7; outline: none; transition: border-color 0.2s ease;" style-focus="border-color: rgba(245,245,247,0.5);">
+          </label>
+        </sc-if>
+        <label style="display: flex; flex-direction: column; gap: 7px; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,245,247,0.45);">Email
+          <input name="email" type="email" autoComplete="email" placeholder="you@email.com" style="border: 1px solid rgba(245,245,247,0.12); background: #1b1b1e; border-radius: 14px; padding: 14px 16px; font-size: 15px; color: #f5f5f7; outline: none; transition: border-color 0.2s ease;" style-focus="border-color: rgba(245,245,247,0.5);">
+        </label>
+        <label style="display: flex; flex-direction: column; gap: 7px; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,245,247,0.45);">Password
+          <input name="password" type="password" placeholder="••••••••" style="border: 1px solid rgba(245,245,247,0.12); background: #1b1b1e; border-radius: 14px; padding: 14px 16px; font-size: 15px; color: #f5f5f7; outline: none; transition: border-color 0.2s ease;" style-focus="border-color: rgba(245,245,247,0.5);">
+        </label>
+
+        <div style="min-height: 18px; font-size: 13px; color: #ff453a; font-weight: 500;">{{ authError }}</div>
+
+        <button type="submit" style="display: flex; align-items: center; justify-content: center; gap: 9px; background: #f5f5f7; color: #08080a; border: none; border-radius: 15px; padding: 15px 0; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.22s ease, transform 0.15s ease;" style-hover="background: #ffffff;" style-active="transform: scale(0.985);">{{ authCta }}</button>
+      </form>
+
+      <button onClick="{{ useDemo }}" style="margin-top: 16px; background: none; border: none; padding: 0; font-size: 13px; color: rgba(245,245,247,0.55); cursor: pointer; text-align: left; text-decoration: underline; text-decoration-color: rgba(245,245,247,0.28); text-underline-offset: 3px;">Skip ahead with the demo account</button>
+    </section>
+  </div>
+</main>
+</sc-if>
+
+<sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
+<div data-pt="shell" style="margin: 16px; background: #131315; border: 1px solid rgba(245,245,247,0.07); border-radius: 30px; box-shadow: 0 26px 60px rgba(0,0,0,0.5); min-height: calc(100vh - 32px);">
+  <div data-pt="body" style="display: flex; gap: 26px; padding: 26px;">
+
+    <nav data-pt="rail" style="position: fixed; top: 42px; left: 42px; height: calc(100vh - 84px); z-index: 60; display: flex; flex-direction: column; align-items: center; gap: 18px; width: 62px; flex: 0 0 auto;">
+      <div style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: #f5f5f7; flex: 0 0 auto;">
+        <span style="display: block; width: 14px; height: 14px; border-radius: 5px; background: #08080a;"></span>
+      </div>
+      <div data-pt="pill" style="display: flex; flex-direction: column; align-items: center; gap: 6px; background: #1b1b1e; border: 1px solid rgba(245,245,247,0.09); border-radius: 999px; padding: 6px; flex: 0 0 auto;">
+        <button onClick="{{ goDashboard }}" title="Dashboard" style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border: none; border-radius: 50%; cursor: pointer; transition: background 0.22s ease; background: {{ navDashBg }};">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{ navDashInk }}" stroke-width="2" stroke-linecap="round"><path d="M4 18V11"></path><path d="M10 18V6"></path><path d="M16 18v-9"></path><path d="M22 18V9"></path></svg>
+        </button>
+        <button onClick="{{ goHoldings }}" title="Holdings" style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border: none; border-radius: 50%; cursor: pointer; transition: background 0.22s ease; background: {{ navHoldBg }};">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{ navHoldInk }}" stroke-width="2"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+        </button>
+        <button onClick="{{ goActivity }}" title="Activity" style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border: none; border-radius: 50%; cursor: pointer; transition: background 0.22s ease; background: {{ navActBg }};">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{ navActInk }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12h4l2.5-5.5 3.5 11 2.5-5.5h4.5"></path></svg>
+        </button>
+      </div>
+      <div data-pt="rail-spacer" style="flex: 1;"></div>
+      <div data-pt="rail-foot" style="display: flex; flex-direction: column; align-items: center; gap: 10px; flex: 0 0 auto;">
+        <div title="{{ profileTitle }}" style="display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 50%; background: #1b1b1e; border: 1px solid rgba(245,245,247,0.12); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; color: #f5f5f7;">{{ initials }}</div>
+        <button onClick="{{ logout }}" title="Sign out" style="display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border: 1px solid rgba(245,245,247,0.09); border-radius: 15px; background: #1b1b1e; cursor: pointer; transition: background 0.22s ease, border-color 0.22s ease;" style-hover="background: #26262a; border-color: rgba(245,245,247,0.24);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(245,245,247,0.65)" stroke-width="2" stroke-linecap="round"><path d="M14 4H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7"></path><path d="M17 8l4 4-4 4"></path><path d="M21 12h-9"></path></svg>
+        </button>
+      </div>
+    </nav>
+    <div data-pt="rail-offset" style="width: 62px; flex: 0 0 62px;"></div>
+
+    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 18px;">
+
+      <header data-pt="topbar" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;">
+        <div>
+          <h1 style="font-size: 30px; font-weight: 700; letter-spacing: -0.03em; margin: 0;">{{ greeting }}</h1>
+          <p style="font-size: 14px; color: rgba(245,245,247,0.55); margin: 6px 0 0;">{{ subGreeting }}</p>
+        </div>
+        <div data-pt="search" style="position: relative; width: 320px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(245,245,247,0.4)" stroke-width="2" stroke-linecap="round" style="position: absolute; left: 15px; top: 14px;"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5L21 21"></path></svg>
+          <input value="{{ query }}" onInput="{{ onSearch }}" placeholder="Search any US or Canadian listing…" style="width: 100%; border: 1px solid rgba(245,245,247,0.1); background: #1b1b1e; border-radius: 999px; padding: 13px 16px 13px 40px; font-size: 14px; color: #f5f5f7; outline: none; transition: border-color 0.2s ease;" style-focus="border-color: rgba(245,245,247,0.4);">
+          <div style="position: absolute; top: 52px; left: 0; right: 0; z-index: 40; background: #1b1b1e; border: 1px solid rgba(245,245,247,0.1); border-radius: 18px; padding: 6px; box-shadow: 0 18px 40px rgba(0,0,0,0.6); display: {{ resultsDisplay }};">
+            <sc-for list="{{ results }}" as="row" hint-placeholder-count="0">
+              <button onClick="{{ row.open }}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; border: none; background: none; border-radius: 13px; padding: 10px 12px; cursor: pointer; text-align: left; color: #f5f5f7; transition: background 0.18s ease;" style-hover="background: rgba(245,245,247,0.07);">
+                <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                  <span style="font-size: 14px; font-weight: 700;">{{ row.symbol }}</span>
+                  <span style="font-size: 12px; color: rgba(245,245,247,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.name }}</span>
+                </span>
+                <span style="display: flex; align-items: center; gap: 8px; flex: 0 0 auto;">
+                  <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; border-radius: 6px; padding: 3px 6px; background: rgba(245,245,247,0.08); color: rgba(245,245,247,0.6);">{{ row.market }}</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px;">{{ row.priceText }}</span>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </header>
+
+      <sc-if value="{{ onDashboard }}" hint-placeholder-val="{{ true }}">
+      <section data-screen-label="Portfolio dashboard" style="display: flex; flex-direction: column; gap: 18px;">
+        <div data-pt="grid-hero" style="display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px;">
+          <div style="background: #1b1b1e; border: 1px solid rgba(245,245,247,0.07); border-radius: 26px; padding: 28px 28px 18px; display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+              <div>
+                <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(245,245,247,0.42);">Total portfolio value</div>
+                <div data-pt="bignum" style="font-family: 'JetBrains Mono', monospace; font-size: 46px; font-weight: 500; letter-spacing: -0.03em; margin: 12px 0 10px;">{{ totalText }}</div>
+                <div style="display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 600; background: {{ returnChipBg }}; color: {{ returnChipInk }};">
+                  <span>{{ returnText }}</span>
+                  <span style="opacity: 0.7;">{{ returnPctText }}</span>
+                </div>
+              </div>
+              <div style="display: flex; gap: 4px; background: rgba(245,245,247,0.06); border-radius: 999px; padding: 4px;">
+                <sc-for list="{{ ranges }}" as="r" hint-placeholder-count="6">
+                  <button onClick="{{ r.select }}" style="border: none; border-radius: 999px; padding: 7px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s ease, color 0.2s ease; background: {{ r.bg }}; color: {{ r.ink }};">{{ r.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="margin-top: 18px;">
+              <svg viewBox="0 0 900 200" preserveAspectRatio="none" style="display: block; width: 100%; height: 200px; overflow: visible;">
+                <path d="{{ portfolioArea }}" fill="rgba(245,245,247,0.09)" style="opacity: {{ areaOpacity }};"></path>
+                <path d="{{ portfolioPath }}" fill="none" stroke="#f5f5f7" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+              </svg>
+            </div>
+          </div>
+
+          <div style="background: #232327; border: 1px solid rgba(245,245,247,0.07); color: #f5f5f7; border-radius: 26px; padding: 26px; display: flex; flex-direction: column; gap: 20px;">
+            <div>
+              <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(245,245,247,0.42);">Buying power</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 500; letter-spacing: -0.02em; margin-top: 10px;">{{ cashText }}</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                <span style="color: rgba(245,245,247,0.55);">Invested</span>
+                <span style="font-family: 'JetBrains Mono', monospace;">{{ investedText }}</span>
+              </div>
+              <div style="display: flex; height: 8px; border-radius: 999px; overflow: hidden; background: rgba(245,245,247,0.12);">
+                <div style="background: #f5f5f7; height: 100%; transition: width 0.6s cubic-bezier(0.65,0,0.25,1); width: {{ investedPctWidth }};"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; color: rgba(245,245,247,0.42);">
+                <span>{{ investedPctText }} deployed</span>
+                <span>{{ positionCountText }}</span>
+              </div>
+            </div>
+            <div style="margin-top: auto; border-top: 1px solid rgba(245,245,247,0.12); padding-top: 18px;">
+              <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(245,245,247,0.42); margin-bottom: 8px;">Unrealized P/L</div>
+              <div style="display: flex; align-items: baseline; gap: 10px;">
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 22px; color: {{ unrealizedInk }};">{{ unrealizedText }}</span>
+                <span style="font-size: 13px; color: rgba(245,245,247,0.5);">{{ unrealizedPctText }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+      </sc-if>
+
+      <sc-if value="{{ onHoldings }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Holdings">
+          <div style="background: #1b1b1e; border: 1px solid rgba(245,245,247,0.07); border-radius: 26px; padding: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <h2 style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Your holdings</h2>
+              <span style="font-size: 12px; color: rgba(245,245,247,0.45);">{{ holdingsCountText }}</span>
+            </div>
+            <sc-if value="{{ hasHoldings }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; flex-direction: column;">
+                <sc-for list="{{ holdings }}" as="h" hint-placeholder-count="4">
+                  <button onClick="{{ h.open }}" style="display: grid; grid-template-columns: minmax(0, 1fr) 74px 104px; gap: 14px; align-items: center; width: 100%; border: none; border-top: 1px solid rgba(245,245,247,0.08); background: none; padding: 16px 8px; cursor: pointer; text-align: left; color: #f5f5f7; border-radius: 14px; transition: background 0.18s ease;" style-hover="background: rgba(245,245,247,0.05);">
+                    <span style="display: flex; align-items: center; gap: 13px; min-width: 0;">
+                      <span style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 13px; font-size: 12px; font-weight: 700; flex: 0 0 auto; color: #f5f5f7; background: {{ h.badgeBg }};">{{ h.badge }}</span>
+                      <span style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+                        <span style="font-size: 14px; font-weight: 700;">{{ h.symbol }}</span>
+                        <span style="font-size: 12px; color: rgba(245,245,247,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ h.sharesText }}</span>
+                      </span>
+                    </span>
+                    <svg viewBox="0 0 74 30" preserveAspectRatio="none" style="display: block; width: 74px; height: 30px;">
+                      <path d="{{ h.spark }}" fill="none" stroke="{{ h.plInk }}" stroke-width="1.8" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                    <span style="display: flex; flex-direction: column; gap: 3px; text-align: right;">
+                      <span style="font-family: 'JetBrains Mono', monospace; font-size: 14px;">{{ h.valueText }}</span>
+                      <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: {{ h.plInk }};">{{ h.plPctText }}</span>
+                    </span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noHoldings }}" hint-placeholder-val="{{ false }}">
+              <div style="border-top: 1px solid rgba(245,245,247,0.08); margin-top: 12px; padding: 34px 0 14px; text-align: center;">
+                <p style="font-size: 15px; font-weight: 600; margin: 0 0 6px;">No positions yet.</p>
+                <p style="font-size: 13px; color: rgba(245,245,247,0.5); margin: 0 0 18px;">Search a ticker or pick something from your watchlist to place a first order.</p>
+              </div>
+            </sc-if>
+          </div>
+
+      </section>
+      </sc-if>
+
+      <sc-if value="{{ onDashboard }}" hint-placeholder-val="{{ true }}">
+      <section data-screen-label="Watchlist">
+          <div style="background: #1b1b1e; border: 1px solid rgba(245,245,247,0.07); border-radius: 26px; padding: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <h2 style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Watchlist</h2>
+              <span style="font-size: 12px; color: rgba(245,245,247,0.45);">Live</span>
+            </div>
+            <div style="display: flex; flex-direction: column;">
+              <sc-for list="{{ watchRows }}" as="w" hint-placeholder-count="5">
+                <button onClick="{{ w.open }}" style="display: grid; grid-template-columns: minmax(0, 1fr) 104px; gap: 12px; align-items: center; width: 100%; border: none; border-top: 1px solid rgba(245,245,247,0.08); background: none; padding: 15px 8px; cursor: pointer; text-align: left; color: #f5f5f7; border-radius: 14px; transition: background 0.18s ease;" style-hover="background: rgba(245,245,247,0.05);">
+                  <span style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+                    <span style="font-size: 14px; font-weight: 700;">{{ w.symbol }}</span>
+                    <span style="font-size: 12px; color: rgba(245,245,247,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ w.name }}</span>
+                  </span>
+                  <span style="display: flex; flex-direction: column; gap: 3px; text-align: right;">
+                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 14px;">{{ w.priceText }}</span>
+                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: {{ w.changeInk }};">{{ w.changeText }}</span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+      </section>
+      </sc-if>
+
+      <sc-if value="{{ onStock }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Stock detail" style="display: flex; flex-direction: column; gap: 18px;">
+        <div data-pt="grid-stock" style="display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; align-items: start;">
+          <div style="background: #1b1b1e; border: 1px solid rgba(245,245,247,0.07); border-radius: 26px; padding: 26px;">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <button onClick="{{ goDashboard }}" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid rgba(245,245,247,0.14); border-radius: 11px; background: none; cursor: pointer; transition: background 0.2s ease;" style-hover="background: rgba(245,245,247,0.08);">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f5f5f7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l-6 6 6 6"></path></svg>
+                  </button>
+                  <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,245,247,0.45);">{{ stockKind }} · {{ stockSector }}</span>
+                  <button onClick="{{ toggleWatch }}" title="{{ watchTitle }}" style="display: flex; align-items: center; gap: 7px; border: 1px solid {{ watchBorder }}; border-radius: 999px; padding: 6px 13px 6px 11px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease; background: {{ watchBg }}; color: {{ watchInk }};">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="{{ watchFill }}" stroke="{{ watchInk }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ watchIconPath }}"></path></svg>
+                    <span>{{ watchLabel }}</span>
+                  </button>
+                </div>
+                <h2 style="font-size: 28px; font-weight: 700; letter-spacing: -0.025em; margin: 14px 0 2px;">{{ stockName }}</h2>
+                <div style="font-size: 13px; color: rgba(245,245,247,0.5); font-weight: 600; letter-spacing: 0.06em;">{{ stockSymbol }}</div>
+                <div style="display: flex; align-items: baseline; gap: 12px; margin-top: 18px;">
+                  <span data-pt="bignum" style="font-family: 'JetBrains Mono', monospace; font-size: 40px; font-weight: 500; letter-spacing: -0.03em;">{{ stockPriceText }}</span>
+                  <span style="display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; background: {{ stockChipBg }}; color: {{ stockChipInk }};">{{ stockChangeText }} {{ stockChangePctText }}</span>
+                </div>
+              </div>
+              <div style="display: flex; gap: 4px; background: rgba(245,245,247,0.06); border-radius: 999px; padding: 4px;">
+                <sc-for list="{{ ranges }}" as="r" hint-placeholder-count="6">
+                  <button onClick="{{ r.select }}" style="border: none; border-radius: 999px; padding: 7px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s ease, color 0.2s ease; background: {{ r.bg }}; color: {{ r.ink }};">{{ r.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+
+            <svg viewBox="0 0 900 240" preserveAspectRatio="none" style="display: block; width: 100%; height: 240px; margin-top: 14px; overflow: visible;">
+              <path d="{{ stockArea }}" fill="{{ stockFill }}" style="opacity: {{ areaOpacity }};"></path>
+              <path d="{{ stockPath }}" fill="none" stroke="{{ stockLineInk }}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+            </svg>
+
+            <div data-pt="stat-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(245,245,247,0.09); border-radius: 18px; overflow: hidden; margin-top: 22px;">
+              <sc-for list="{{ stats }}" as="s" hint-placeholder-count="6">
+                <div style="background: #1b1b1e; padding: 16px 18px;">
+                  <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,245,247,0.42);">{{ s.label }}</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 16px; margin-top: 7px;">{{ s.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 18px;">
+            <div style="background: #232327; border: 1px solid rgba(245,245,247,0.07); border-radius: 26px; padding: 24px;">
+              <div style="display: flex; gap: 4px; background: rgba(245,245,247,0.07); border-radius: 14px; padding: 4px; margin-bottom: 20px;">
+                <button onClick="{{ selectBuy }}" style="flex: 1; border: none; border-radius: 11px; padding: 11px 0; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s ease, color 0.2s ease; background: {{ buyTabBg }}; color: {{ buyTabInk }};">Buy</button>
+                <button onClick="{{ selectSell }}" style="flex: 1; border: none; border-radius: 11px; padding: 11px 0; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s ease, color 0.2s ease; background: {{ sellTabBg }}; color: {{ sellTabInk }};">Sell</button>
+              </div>
+              <label style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,245,247,0.45);">Shares
+                <input value="{{ qtyInput }}" onInput="{{ onQty }}" inputMode="numeric" placeholder="0" style="border: 1px solid rgba(245,245,247,0.12); background: #131315; border-radius: 14px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #f5f5f7; outline: none; transition: border-color 0.2s ease;" style-focus="border-color: rgba(245,245,247,0.5);">
+              </label>
+              <div style="display: flex; gap: 6px; margin-top: 10px;">
+                <sc-for list="{{ qtyPresets }}" as="p" hint-placeholder-count="4">
+                  <button onClick="{{ p.apply }}" style="flex: 1; border: 1px solid rgba(245,245,247,0.12); background: none; border-radius: 11px; padding: 8px 0; font-size: 12px; font-weight: 600; color: #f5f5f7; cursor: pointer; transition: background 0.2s ease;" style-hover="background: rgba(245,245,247,0.08);">{{ p.label }}</button>
+                </sc-for>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid rgba(245,245,247,0.1); margin-top: 20px; padding-top: 16px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                  <span style="color: rgba(245,245,247,0.55);">Market price</span>
+                  <span style="font-family: 'JetBrains Mono', monospace;">{{ stockPriceText }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                  <span style="color: rgba(245,245,247,0.55);">{{ estimateLabel }}</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">{{ estimateText }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                  <span style="color: rgba(245,245,247,0.55);">{{ remainingLabel }}</span>
+                  <span style="font-family: 'JetBrains Mono', monospace;">{{ remainingText }}</span>
+                </div>
+              </div>
+              <div style="min-height: 18px; margin-top: 12px; font-size: 13px; font-weight: 500; color: #ff453a;">{{ orderError }}</div>
+              <button onClick="{{ submitOrder }}" style="display: flex; align-items: center; justify-content: center; width: 100%; border: none; border-radius: 15px; padding: 15px 0; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.22s ease, transform 0.15s ease; background: {{ orderBtnBg }}; color: {{ orderBtnInk }};" style-active="transform: scale(0.985);">{{ orderCta }}</button>
+            </div>
+
+            <div style="background: #1b1b1e; border: 1px solid rgba(245,245,247,0.07); border-radius: 26px; padding: 24px;">
+              <h3 style="font-size: 15px; font-weight: 700; margin: 0 0 14px;">Your position</h3>
+              <sc-if value="{{ hasPosition }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                    <span style="color: rgba(245,245,247,0.55);">Shares</span><span style="font-family: 'JetBrains Mono', monospace;">{{ posQtyText }}</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                    <span style="color: rgba(245,245,247,0.55);">Average cost</span><span style="font-family: 'JetBrains Mono', monospace;">{{ posAvgText }}</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                    <span style="color: rgba(245,245,247,0.55);">Market value</span><span style="font-family: 'JetBrains Mono', monospace;">{{ posValueText }}</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 13px; border-top: 1px solid rgba(245,245,247,0.08); padding-top: 12px;">
+                    <span style="color: rgba(245,245,247,0.55);">Total return</span>
+                    <span style="font-family: 'JetBrains Mono', monospace; color: {{ posPlInk }};">{{ posPlText }} · {{ posPlPctText }}</span>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ noPosition }}" hint-placeholder-val="{{ true }}">
+                <p style="font-size: 13px; color: rgba(245,245,247,0.5); line-height: 1.6; margin: 0;">You do not hold {{ stockSymbol }} yet. Buying is instant and settles against your fake cash balance.</p>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </section>
+      </sc-if>
+
+      <sc-if value="{{ onActivity }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Activity" style="display: flex; flex-direction: column; gap: 18px;">
+        <div data-pt="grid-two" style="display: grid; grid-template-columns: 1fr 1.35fr; gap: 18px; align-items: start;">
+          <div style="display: flex; flex-direction: column; gap: 18px;">
+            <div style="background: #232327; border: 1px solid rgba(245,245,247,0.07); color: #f5f5f7; border-radius: 26px; padding: 26px;">
+              <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(245,245,247,0.42);">Available cash</div>
+              <div data-pt="bignum" style="font-family: 'JetBrains Mono', monospace; font-size: 40px; font-weight: 500; letter-spacing: -0.03em; margin: 12px 0 18px;">{{ cashText }}</div>
+              <div style="display: flex; justify-content: space-between; font-size: 13px; border-top: 1px solid rgba(245,245,247,0.12); padding-top: 16px;">
+                <span style="color: rgba(245,245,247,0.55);">Total funded</span>
+                <span style="font-family: 'JetBrains Mono', monospace;">{{ depositedText }}</span>
+              </div>
+            </div>
+            <div style="background: #1b1b1e; border: 1px solid rgba(245,245,247,0.07); border-radius: 26px; padding: 26px;">
+              <h2 style="font-size: 17px; font-weight: 700; margin: 0 0 4px;">Top up your practice cash</h2>
+              <p style="font-size: 13px; color: rgba(245,245,247,0.55); line-height: 1.55; margin: 0 0 18px;">Simulated funds only — nothing leaves a real account.</p>
+              <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+                <sc-for list="{{ depositPresets }}" as="d" hint-placeholder-count="4">
+                  <button onClick="{{ d.apply }}" style="flex: 1; border: 1px solid rgba(245,245,247,0.12); background: none; border-radius: 12px; padding: 10px 0; font-size: 13px; font-weight: 600; color: #f5f5f7; cursor: pointer; transition: background 0.2s ease;" style-hover="background: rgba(245,245,247,0.08);">{{ d.label }}</button>
+                </sc-for>
+              </div>
+              <input value="{{ depositInput }}" onInput="{{ onDeposit }}" inputMode="numeric" placeholder="Custom amount" style="width: 100%; border: 1px solid rgba(245,245,247,0.12); background: #131315; border-radius: 14px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #f5f5f7; outline: none; transition: border-color 0.2s ease;" style-focus="border-color: rgba(245,245,247,0.5);">
+              <div style="min-height: 18px; margin-top: 10px; font-size: 13px; color: #ff453a;">{{ depositError }}</div>
+              <button onClick="{{ submitDeposit }}" style="width: 100%; background: #f5f5f7; color: #08080a; border: none; border-radius: 15px; padding: 15px 0; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.22s ease, transform 0.15s ease;" style-hover="background: #ffffff;" style-active="transform: scale(0.985);">Deposit funds</button>
+            </div>
+          </div>
+
+          <div style="background: #1b1b1e; border: 1px solid rgba(245,245,247,0.07); border-radius: 26px; padding: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+              <h2 style="font-size: 17px; font-weight: 700; margin: 0;">Activity</h2>
+              <span style="font-size: 12px; color: rgba(245,245,247,0.45);">{{ activityCountText }}</span>
+            </div>
+            <div data-pt="scroll" style="display: flex; flex-direction: column; max-height: 560px; overflow-y: auto;">
+              <sc-for list="{{ activity }}" as="t" hint-placeholder-count="5">
+                <div style="display: grid; grid-template-columns: 40px 1fr auto; gap: 14px; align-items: center; border-top: 1px solid rgba(245,245,247,0.08); padding: 15px 4px;">
+                  <span style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 13px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; background: {{ t.badgeBg }}; color: {{ t.badgeInk }};">{{ t.badge }}</span>
+                  <span style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+                    <span style="font-size: 14px; font-weight: 600;">{{ t.title }}</span>
+                    <span style="font-size: 12px; color: rgba(245,245,247,0.5);">{{ t.when }}</span>
+                  </span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 14px; text-align: right; color: {{ t.amountInk }};">{{ t.amountText }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ noActivity }}" hint-placeholder-val="{{ false }}">
+              <p style="border-top: 1px solid rgba(245,245,247,0.08); padding: 30px 0 10px; text-align: center; font-size: 13px; color: rgba(245,245,247,0.5); margin: 0;">No transactions yet.</p>
+            </sc-if>
+          </div>
+        </div>
+      </section>
+      </sc-if>
+
+    </div>
+  </div>
+</div>
+
+<div style="position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 80; display: {{ toastDisplay }}; animation: pt-rise 0.28s ease both;">
+  <div style="display: flex; align-items: center; gap: 12px; background: #f5f5f7; color: #08080a; border-radius: 999px; padding: 14px 24px; font-size: 14px; font-weight: 700; box-shadow: 0 16px 40px rgba(0,0,0,0.55);">
+    <span style="display: block; width: 8px; height: 8px; border-radius: 50%; background: #08080a;"></span>
+    <span>{{ toastText }}</span>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;apiBaseUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;http://localhost:4000&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Backend&quot;},&quot;startingCash&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:100000,&quot;min&quot;:1000,&quot;max&quot;:1000000,&quot;step&quot;:1000,&quot;unit&quot;:&quot;$&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;livePrices&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Market data&quot;},&quot;chartStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Area&quot;,&quot;options&quot;:[&quot;Area&quot;,&quot;Line&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Market data&quot;}}">
+/**
+ * ViewModel. Owns screen state and talks to a single TradingGateway port
+ * (src/gateways/TradingGateway.js) — the same code path whether the Express API
+ * is running or the in-browser adapter is standing in for it. No business rules
+ * here: trade validity, valuation and pricing all belong to the gateway/domain.
+ */
+class Component extends DCLogic {
+  state = {
+    ready: false,
+    mode: 'local',
+    screen: 'auth',
+    cameFrom: 'dashboard',
+    authMode: 'login',
+    authError: '',
+    busy: false,
+    user: null,
+    portfolio: null,
+    transactions: [],
+    instruments: [],
+    quotes: {},
+    watchlist: [],
+    symbol: 'AAPL',
+    range: '1M',
+    side: 'buy',
+    qtyInput: '',
+    orderError: '',
+    depositInput: '',
+    depositError: '',
+    query: '',
+    results: [],
+    toast: '',
+  };
+
+  series = new Map();
+  pendingSeries = new Set();
+  meta = new Map();
+  pendingMeta = new Set();
+
+  componentDidMount() {
+    Promise.all([
+      import('./src/format.js'),
+      import('./src/chart.js'),
+      import('./src/gateways/resolveGateway.js'),
+    ])
+      .then(async ([format, chart, { resolveGateway }]) => {
+        this.fmt = format;
+        this.chart = chart;
+        this.gateway = await resolveGateway({
+          baseUrl: this.props.apiBaseUrl ?? 'http://localhost:4000',
+          startingCash: this.props.startingCash,
+          livePrices: this.props.livePrices ?? true,
+        });
+        const instruments = await this.gateway.listInstruments();
+        const session = await this.gateway.restoreSession();
+        this.setState({ ready: true, mode: this.gateway.mode, instruments });
+        if (session) await this._loadAccount(session.user);
+      })
+      .catch((error) => this.setState({ ready: true, authError: error.message }));
+  }
+
+  componentDidUpdate() {
+    this._syncQuotes();
+  }
+
+  componentWillUnmount() {
+    if (this._unsubQuotes) this._unsubQuotes();
+    if (this.gateway && this.gateway.destroy) this.gateway.destroy();
+    clearTimeout(this._toastTimer);
+  }
+
+  // ---- data loading ------------------------------------------------------
+
+  async _loadAccount(user) {
+    const [portfolio, transactions, watchlist] = await Promise.all([
+      this.gateway.getPortfolio(),
+      this.gateway.listTransactions(),
+      this.gateway.getWatchlist(),
+    ]);
+    this.setState({ user, portfolio, transactions, watchlist, screen: 'dashboard', authError: '', busy: false });
+  }
+
+  /** Keeps the live quote subscription aligned with the symbols on screen. */
+  _syncQuotes() {
+    if (!this.gateway || !this.state.user) return;
+    const symbols = [
+      ...new Set([
+        ...this.state.watchlist,
+        ...(this.state.portfolio?.positions ?? []).map((position) => position.symbol),
+        this.state.symbol,
+      ]),
+    ]
+      .filter(Boolean)
+      .sort();
+    const key = symbols.join(',');
+    if (key === this._quoteKey) return;
+    this._quoteKey = key;
+    if (this._unsubQuotes) this._unsubQuotes();
+    this._unsubQuotes = this.gateway.subscribeQuotes(symbols, (quotes) =>
+      this.setState((state) => ({ quotes: { ...state.quotes, ...quotes } }))
+    );
+  }
+
+  /** A ".TO"/".V" suffix is Finnhub's marker for a Canadian listing. */
+  _marketOf(symbol) {
+    return /\.(TO|V|NE|CN)$/i.test(String(symbol ?? '')) ? 'CA' : 'US';
+  }
+
+  /**
+   * Instrument metadata (name, sector, fundamentals) resolved lazily and cached,
+   * so any of the thousands of tradable symbols can be opened without shipping a
+   * catalogue to the browser.
+   */
+  _metaFor(symbol) {
+    if (!symbol) return {};
+    if (this.meta.has(symbol)) return this.meta.get(symbol);
+    const seeded = this.state.instruments.find((item) => item.symbol === symbol);
+    if (seeded) {
+      this.meta.set(symbol, seeded);
+      return seeded;
+    }
+    if (!this.pendingMeta.has(symbol)) {
+      this.pendingMeta.add(symbol);
+      this.gateway
+        .getInstrument(symbol)
+        .then(({ instrument }) => {
+          this.meta.set(symbol, instrument);
+          this.forceUpdate();
+        })
+        .catch(() => this.meta.set(symbol, { symbol, name: symbol }))
+        .finally(() => this.pendingMeta.delete(symbol));
+    }
+    return { symbol, name: symbol };
+  }
+
+  /** Debounced symbol search against the gateway — no local universe. */
+  _search(value) {
+    this.setState({ query: value });
+    clearTimeout(this._searchTimer);
+    const query = value.trim();
+    if (!query) {
+      this.setState({ results: [] });
+      return;
+    }
+    this._searchTimer = setTimeout(() => {
+      this.gateway
+        .searchInstruments(query)
+        .then((results) => {
+          results.forEach((result) => {
+            if (!this.meta.has(result.symbol)) this.meta.set(result.symbol, result);
+          });
+          this.setState({ results });
+        })
+        .catch(() => this.setState({ results: [] }));
+    }, 220);
+  }
+
+  /** Cached price history. Returns [] on the first call and re-renders once loaded. */
+  _seriesFor(symbol, range) {
+    const key = `${symbol}:${range}`;
+    if (this.series.has(key)) return this.series.get(key);
+    if (!this.pendingSeries.has(key)) {
+      this.pendingSeries.add(key);
+      this.gateway
+        .getSeries(symbol, range)
+        .then((values) => {
+          this.series.set(key, values);
+          this.forceUpdate();
+        })
+        .catch(() => this.series.set(key, []))
+        .finally(() => this.pendingSeries.delete(key));
+    }
+    return [];
+  }
+
+  /**
+   * Portfolio history, reconstructed from holdings: sum(qty x price) per point
+   * plus current cash. Works identically against real candles and simulated ones.
+   */
+  _portfolioSeries(range) {
+    const positions = this.state.portfolio?.positions ?? [];
+    const loaded = positions
+      .map((position) => ({ qty: position.qty, values: this._seriesFor(position.symbol, range) }))
+      .filter((entry) => entry.values.length > 1);
+    if (loaded.length === 0) return [];
+    const length = Math.min(...loaded.map((entry) => entry.values.length));
+    const cash = this.state.portfolio.cash;
+    return Array.from({ length }, (_, index) =>
+      loaded.reduce(
+        (total, entry) => total + entry.qty * entry.values[Math.floor((index * entry.values.length) / length)],
+        cash
+      )
+    );
+  }
+
+  _toast(message) {
+    this.setState({ toast: message });
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => this.setState({ toast: '' }), 2800);
+  }
+
+  _quote(symbol) {
+    return this.state.quotes[symbol] ?? null;
+  }
+
+  _priceOf(symbol) {
+    return this._quote(symbol)?.price ?? this._metaFor(symbol).referencePrice ?? 0;
+  }
+
+  renderVals() {
+    const state = this.state;
+    const gain = '#30d158';
+    const loss = '#ff453a';
+    // On a dark shell the "selected" treatment inverts: light chip, dark ink.
+    const onSurface = '#f5f5f7';
+    const onLight = '#08080a';
+    const muted = 'rgba(245,245,247,0.55)';
+    const areaOpacity = (this.props.chartStyle ?? 'Area') === 'Area' ? 1 : 0;
+
+    const auth = {
+      onAuth: !state.user,
+      signedIn: !!state.user,
+      isRegister: state.authMode === 'register',
+      authTitle: state.authMode === 'register' ? 'Create your account' : 'Welcome back',
+      authSubtitle:
+        state.authMode === 'register'
+          ? 'You start with practice cash and nothing to lose.'
+          : 'Sign in to pick up your portfolio where you left it.',
+      authCta: state.busy ? 'One moment…' : state.authMode === 'register' ? 'Open my account' : 'Log in',
+      authError: state.authError,
+      loginTabBg: state.authMode === 'login' ? '#2c2c31' : 'transparent',
+      loginTabColor: state.authMode === 'login' ? onSurface : muted,
+      registerTabBg: state.authMode === 'register' ? '#2c2c31' : 'transparent',
+      registerTabColor: state.authMode === 'register' ? onSurface : muted,
+      showLogin: () => this.setState({ authMode: 'login', authError: '' }),
+      showRegister: () => this.setState({ authMode: 'register', authError: '' }),
+      useDemo: () => this._authenticate('login', { email: 'demo@paper.app', password: 'demo123' }),
+      submitAuth: (event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        this._authenticate(state.authMode, {
+          name: data.get('name') ?? '',
+          email: data.get('email') ?? '',
+          password: data.get('password') ?? '',
+        });
+      },
+      areaOpacity,
+    };
+
+    if (!state.ready || !state.user || !state.portfolio) {
+      return { ...auth, onDashboard: false, onHoldings: false, onStock: false, onActivity: false };
+    }
+
+    const fmt = this.fmt;
+    const portfolio = state.portfolio;
+    const instrument = this._metaFor(state.symbol);
+    const quote = this._quote(instrument.symbol);
+    const price = this._priceOf(instrument.symbol);
+    const position = portfolio.positions.find((candidate) => candidate.symbol === instrument.symbol) ?? null;
+    const heldQty = position?.qty ?? 0;
+
+    const isWatched = state.watchlist.includes(instrument.symbol);
+
+    const qty = parseInt(state.qtyInput, 10);
+    const qtySafe = Number.isFinite(qty) ? qty : 0;
+    const estimate = qtySafe * price;
+
+    const hour = new Date().getHours();
+    const partOfDay = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
+    const firstName = (state.user.name ?? '').split(' ')[0];
+
+    const activeTab = state.screen === 'stock' ? state.cameFrom : state.screen;
+    const tabBg = (tab) => (tab === activeTab ? onSurface : 'transparent');
+    const tabInk = (tab) => (tab === activeTab ? onLight : 'rgba(245,245,247,0.55)');
+
+    const openStock = (symbol) => () => {
+      this._metaFor(symbol);
+      this.setState((current) => ({
+        screen: 'stock',
+        cameFrom: current.screen === 'stock' ? current.cameFrom : current.screen,
+        symbol,
+        side: 'buy',
+        qtyInput: '',
+        orderError: '',
+        query: '',
+        results: [],
+      }));
+    };
+
+    const results = state.results.slice(0, 8).map((item) => ({
+      symbol: item.symbol,
+      name: item.name,
+      market: this._marketOf(item.symbol),
+      priceText: this._quote(item.symbol) ? fmt.money(this._priceOf(item.symbol)) : (item.kind ?? ''),
+      open: openStock(item.symbol),
+    }));
+
+    const portfolioSeries = this._portfolioSeries(state.range);
+    const stockSeries = this._seriesFor(instrument.symbol, state.range);
+    const stockUp = stockSeries.length > 1 ? stockSeries[stockSeries.length - 1] >= stockSeries[0] : true;
+    const changePct = quote?.changePct ?? 0;
+    const changeAbs = quote?.change ?? 0;
+
+    return {
+      ...auth,
+      onDashboard: state.screen === 'dashboard',
+      onHoldings: state.screen === 'holdings',
+      onStock: state.screen === 'stock',
+      onActivity: state.screen === 'activity',
+      goDashboard: () => this.setState({ screen: 'dashboard', query: '' }),
+      goHoldings: () => this.setState({ screen: 'holdings', query: '' }),
+      goActivity: () => this.setState({ screen: 'activity', depositError: '', query: '' }),
+      logout: async () => {
+        await this.gateway.logout();
+        if (this._unsubQuotes) this._unsubQuotes();
+        this._quoteKey = null;
+        this.setState({ user: null, portfolio: null, transactions: [], screen: 'auth', authMode: 'login', authError: '' });
+      },
+      navDashBg: tabBg('dashboard'),
+      navDashInk: tabInk('dashboard'),
+      navHoldBg: tabBg('holdings'),
+      navHoldInk: tabInk('holdings'),
+      navActBg: tabBg('activity'),
+      navActInk: tabInk('activity'),
+      initials: (state.user.name ?? '?')
+        .split(' ')
+        .map((part) => part[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase(),
+      profileTitle: `${state.user.name} · ${state.user.email}`,
+      greeting: `Good ${partOfDay}, ${firstName}.`,
+      subGreeting:
+        state.screen === 'activity'
+          ? 'Manage your practice cash and review every trade.'
+          : state.screen === 'holdings'
+          ? 'Every position you hold, valued against live prices.'
+          : `Here is how your paper portfolio is tracking today. Data: ${state.mode === 'remote' ? 'live API' : 'offline simulation'}.`,
+
+      query: state.query,
+      onSearch: (event) => this._search(event.target.value),
+      results,
+      resultsDisplay: results.length ? 'block' : 'none',
+
+      totalText: fmt.money(portfolio.total),
+      returnText: fmt.signedMoney(portfolio.totalReturn),
+      returnPctText: fmt.signedPercent(portfolio.totalReturnPct),
+      returnChipBg: portfolio.totalReturn >= 0 ? 'rgba(48,209,88,0.16)' : 'rgba(255,69,58,0.16)',
+      returnChipInk: portfolio.totalReturn >= 0 ? gain : loss,
+      cashText: fmt.money(portfolio.cash),
+      investedText: fmt.money(portfolio.invested),
+      investedPctWidth:
+        (portfolio.total ? Math.min(100, (portfolio.invested / portfolio.total) * 100) : 0).toFixed(1) + '%',
+      investedPctText: (portfolio.total ? (portfolio.invested / portfolio.total) * 100 : 0).toFixed(0) + '%',
+      positionCountText: `${portfolio.positions.length} position${portfolio.positions.length === 1 ? '' : 's'}`,
+      unrealizedText: fmt.signedMoney(portfolio.unrealized),
+      unrealizedPctText: fmt.signedPercent(portfolio.unrealizedPct),
+      unrealizedInk: portfolio.unrealized >= 0 ? gain : loss,
+      depositedText: fmt.money(portfolio.deposited),
+
+      portfolioPath: this.chart.toPath(portfolioSeries, 900, 200, 10),
+      portfolioArea: this.chart.toAreaPath(portfolioSeries, 900, 200, 10),
+
+      ranges: ['1D', '1W', '1M', '3M', '1Y', '5Y'].map((id) => ({
+        label: id,
+        bg: id === state.range ? onSurface : 'transparent',
+        ink: id === state.range ? onLight : 'rgba(245,245,247,0.55)',
+        select: () => this.setState({ range: id }),
+      })),
+
+      hasHoldings: portfolio.positions.length > 0,
+      noHoldings: portfolio.positions.length === 0,
+      holdingsCountText: fmt.money(portfolio.invested) + ' invested',
+      holdings: portfolio.positions.map((held) => {
+        const meta = this._metaFor(held.symbol);
+        return {
+          symbol: held.symbol,
+          badge: held.symbol.slice(0, 2),
+          badgeBg: meta.kind === 'ETF' ? 'rgba(245,196,81,0.22)' : 'rgba(245,245,247,0.09)',
+          sharesText: `${fmt.quantity(held.qty)} sh · avg ${fmt.money(held.avgCost)}`,
+          valueText: fmt.money(held.value),
+          plPctText: fmt.signedPercent(held.unrealizedPct),
+          plInk: held.unrealized >= 0 ? gain : loss,
+          spark: this.chart.toPath(this._seriesFor(held.symbol, '1W'), 74, 30, 4),
+          open: openStock(held.symbol),
+        };
+      }),
+
+      watchRows: state.watchlist.map((symbol) => {
+        const meta = this._metaFor(symbol);
+        const row = this._quote(symbol);
+        return {
+          symbol,
+          name: meta.name,
+          priceText: fmt.money(this._priceOf(symbol)),
+          changeText: fmt.signedPercent(row?.changePct ?? 0),
+          changeInk: (row?.changePct ?? 0) >= 0 ? gain : loss,
+          open: openStock(symbol),
+        };
+      }),
+
+      stockSymbol: instrument.symbol,
+      stockName: instrument.name,
+      stockKind: instrument.kind ?? 'Equity',
+      stockSector: instrument.sector ?? (this._marketOf(instrument.symbol) === 'CA' ? 'Canada listed' : 'US listed'),
+      stockPriceText: fmt.money(price),
+      stockChangeText: fmt.signedMoney(changeAbs),
+      stockChangePctText: '(' + fmt.signedPercent(changePct) + ')',
+      stockChipBg: changeAbs >= 0 ? 'rgba(48,209,88,0.16)' : 'rgba(255,69,58,0.16)',
+      stockChipInk: changeAbs >= 0 ? gain : loss,
+      stockPath: this.chart.toPath(stockSeries, 900, 240, 12),
+      stockArea: this.chart.toAreaPath(stockSeries, 900, 240, 12),
+      stockLineInk: stockUp ? gain : loss,
+      stockFill: stockUp ? 'rgba(48,209,88,0.12)' : 'rgba(255,69,58,0.12)',
+      stats: [
+        { label: 'Market cap', value: instrument.mktCap ? fmt.compact(instrument.mktCap) : '—' },
+        { label: 'P/E ratio', value: instrument.peRatio ? instrument.peRatio.toFixed(1) : '—' },
+        { label: 'Dividend yield', value: (instrument.divYield ?? 0).toFixed(2) + '%' },
+        { label: 'Previous close', value: fmt.money(price - changeAbs) },
+        { label: state.range + ' low', value: stockSeries.length ? fmt.money(Math.min(...stockSeries)) : '—' },
+        { label: state.range + ' high', value: stockSeries.length ? fmt.money(Math.max(...stockSeries)) : '—' },
+      ],
+
+      qtyInput: state.qtyInput,
+      onQty: (event) => this.setState({ qtyInput: event.target.value.replace(/[^0-9]/g, ''), orderError: '' }),
+      selectBuy: () => this.setState({ side: 'buy', orderError: '' }),
+      selectSell: () => this.setState({ side: 'sell', orderError: '' }),
+      buyTabBg: state.side === 'buy' ? onSurface : 'transparent',
+      buyTabInk: state.side === 'buy' ? onLight : muted,
+      sellTabBg: state.side === 'sell' ? loss : 'transparent',
+      sellTabInk: state.side === 'sell' ? '#08080a' : muted,
+      qtyPresets:
+        state.side === 'buy'
+          ? [1, 5, 10, 'Max'].map((preset) => ({
+              label: String(preset),
+              apply: () =>
+                this.setState({
+                  qtyInput: String(preset === 'Max' ? Math.floor(portfolio.cash / (price || 1)) : preset),
+                  orderError: '',
+                }),
+            }))
+          : ['25%', '50%', '75%', 'All'].map((label, index) => ({
+              label,
+              apply: () =>
+                this.setState({
+                  qtyInput: String(Math.max(1, Math.floor(heldQty * [0.25, 0.5, 0.75, 1][index]))),
+                  orderError: '',
+                }),
+            })),
+      estimateLabel: state.side === 'buy' ? 'Estimated cost' : 'Estimated proceeds',
+      estimateText: fmt.money(estimate),
+      remainingLabel: state.side === 'buy' ? 'Cash after order' : 'Shares after order',
+      remainingText:
+        state.side === 'buy'
+          ? fmt.money(portfolio.cash - estimate)
+          : fmt.quantity(Math.max(0, heldQty - qtySafe)) + ' sh',
+      orderError: state.orderError,
+      orderBtnBg: state.side === 'buy' ? onSurface : loss,
+      orderBtnInk: onLight,
+      orderCta: `${state.side === 'buy' ? 'Buy' : 'Sell'} ${instrument.symbol}`,
+      submitOrder: () => this._submitOrder(instrument.symbol, qtySafe),
+
+      watchLabel: isWatched ? 'On watchlist' : 'Add to watchlist',
+      watchTitle: isWatched ? `Remove ${instrument.symbol} from your watchlist` : `Add ${instrument.symbol} to your watchlist`,
+      watchBg: isWatched ? onSurface : 'transparent',
+      watchInk: isWatched ? onLight : 'rgba(245,245,247,0.65)',
+      watchBorder: isWatched ? onSurface : 'rgba(245,245,247,0.18)',
+      watchFill: 'none',
+      watchIconPath: isWatched ? 'M5 12.5l4.5 4.5L19 7.5' : 'M12 5v14M5 12h14',
+      toggleWatch: () => this._toggleWatchlist(instrument.symbol),
+
+      hasPosition: !!position,
+      noPosition: !position,
+      posQtyText: position ? fmt.quantity(position.qty) + ' sh' : '',
+      posAvgText: position ? fmt.money(position.avgCost) : '',
+      posValueText: position ? fmt.money(position.value) : '',
+      posPlText: position ? fmt.signedMoney(position.unrealized) : '',
+      posPlPctText: position ? fmt.signedPercent(position.unrealizedPct) : '',
+      posPlInk: position && position.unrealized >= 0 ? gain : loss,
+
+      depositInput: state.depositInput,
+      depositError: state.depositError,
+      onDeposit: (event) => this.setState({ depositInput: event.target.value.replace(/[^0-9.]/g, ''), depositError: '' }),
+      depositPresets: [1000, 5000, 10000, 25000].map((amount) => ({
+        label: '$' + amount / 1000 + 'K',
+        apply: () => this.setState({ depositInput: String(amount), depositError: '' }),
+      })),
+      submitDeposit: () => this._submitDeposit(),
+
+      activity: state.transactions.map((transaction) => ({
+        badge: transaction.type === 'deposit' ? 'CASH' : transaction.type.toUpperCase(),
+        badgeBg:
+          transaction.type === 'buy'
+            ? 'rgba(245,245,247,0.09)'
+            : transaction.type === 'sell'
+            ? 'rgba(255,69,58,0.16)'
+            : 'rgba(245,196,81,0.22)',
+        badgeInk: transaction.type === 'sell' ? loss : '#f5f5f7',
+        title:
+          transaction.type === 'deposit'
+            ? 'Cash deposit'
+            : `${transaction.type === 'buy' ? 'Bought' : 'Sold'} ${fmt.quantity(transaction.qty)} ${transaction.symbol} @ ${fmt.money(transaction.price)}`,
+        when: fmt.dateTime(transaction.createdAt),
+        amountText: fmt.signedMoney(transaction.amount),
+        amountInk: transaction.amount >= 0 ? gain : '#f5f5f7',
+      })),
+      activityCountText: `${state.transactions.length} record${state.transactions.length === 1 ? '' : 's'}`,
+      noActivity: state.transactions.length === 0,
+
+      toastDisplay: state.toast ? 'block' : 'none',
+      toastText: state.toast,
+    };
+  }
+
+  // ---- commands ----------------------------------------------------------
+
+  async _authenticate(mode, payload) {
+    this.setState({ busy: true, authError: '' });
+    try {
+      const session = mode === 'register' ? await this.gateway.register(payload) : await this.gateway.login(payload);
+      await this._loadAccount(session.user);
+    } catch (error) {
+      this.setState({ authError: error.message, busy: false });
+    }
+  }
+
+  async _submitOrder(symbol, qty) {
+    if (qty <= 0) {
+      this.setState({ orderError: 'Enter a quantity greater than zero.' });
+      return;
+    }
+    const side = this.state.side;
+    try {
+      const { execution, portfolio } = await this.gateway.placeOrder({ side, symbol, qty });
+      const transactions = await this.gateway.listTransactions();
+      this.setState({ portfolio, transactions, qtyInput: '', orderError: '' });
+      this._toast(`${side === 'buy' ? 'Bought' : 'Sold'} ${qty} ${symbol} at ${this.fmt.money(execution.price)}`);
+    } catch (error) {
+      this.setState({ orderError: error.message });
+    }
+  }
+
+  /** Optimistic watchlist toggle: update on screen, then persist. */
+  async _toggleWatchlist(symbol) {
+    const current = this.state.watchlist;
+    const next = current.includes(symbol) ? current.filter((entry) => entry !== symbol) : [...current, symbol];
+    this.setState({ watchlist: next });
+    try {
+      const saved = await this.gateway.setWatchlist(next);
+      this.setState({ watchlist: saved });
+      this._toast(next.includes(symbol) ? `${symbol} added to your watchlist` : `${symbol} removed from your watchlist`);
+    } catch (error) {
+      this.setState({ watchlist: current });
+      this._toast('Could not save your watchlist');
+    }
+  }
+
+  async _submitDeposit() {
+    const amount = parseFloat(this.state.depositInput);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      this.setState({ depositError: 'Enter an amount greater than zero.' });
+      return;
+    }
+    try {
+      const { portfolio } = await this.gateway.deposit(amount);
+      const transactions = await this.gateway.listTransactions();
+      this.setState({ portfolio, transactions, depositInput: '', depositError: '' });
+      this._toast(`Deposited ${this.fmt.money(amount)} in practice cash`);
+    } catch (error) {
+      this.setState({ depositError: error.message });
+    }
+  }
+}
+</script>
+</body>
+</html>

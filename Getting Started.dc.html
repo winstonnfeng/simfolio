@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+doc-page:not(:defined){visibility:hidden}
+body{margin:0;font-family:Manrope,system-ui,sans-serif;color:#1d1d1f}
+a{color:#0071e3;text-decoration:none;border-bottom:1px solid rgba(0,113,227,.3)}
+a:hover{color:#0058b0;border-bottom-color:#0058b0}
+pre{break-inside:avoid}
+.kb{break-inside:avoid}
+</style>
+<script src="./doc-page.js"></script>
+</helmet>
+<doc-page margin="0.8in">
+
+<div style="display:flex;flex-direction:column;gap:6px;padding-bottom:22px;border-bottom:3px solid #1d1d1f;margin-bottom:34px">
+<div style="font-family:'JetBrains Mono',monospace;font-size:10.5pt;letter-spacing:.14em;text-transform:uppercase;color:#0071e3;font-weight:500">Simfolio — Setup Guide</div>
+<h1 style="margin:0;font-size:30pt;font-weight:800;letter-spacing:-.02em;line-height:1.05">Getting this running on your computer</h1>
+<p style="margin:8px 0 0;font-size:12pt;line-height:1.5;color:#6e6e73;max-width:46em">Written for someone who has used Python, Java, HTML and CSS, and has never touched a terminal-run server or a database. Do the steps in order. Do not skip step 1.</p>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:36px" class="kb">
+<div style="background:#f5f5f7;border-radius:14px;padding:18px 20px">
+<div style="font-size:9.5pt;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6e6e73;margin-bottom:8px">Time needed</div>
+<div style="font-size:13pt;font-weight:700">45–90 minutes</div>
+<div style="font-size:10.5pt;color:#6e6e73;line-height:1.45;margin-top:4px">Most of it is waiting for installs and signing up for two free accounts.</div>
+</div>
+<div style="background:#f5f5f7;border-radius:14px;padding:18px 20px">
+<div style="font-size:9.5pt;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6e6e73;margin-bottom:8px">What you'll end up with</div>
+<div style="font-size:13pt;font-weight:700">A working app at localhost</div>
+<div style="font-size:10.5pt;color:#6e6e73;line-height:1.45;margin-top:4px">Real stock prices, a login, a portfolio that survives a refresh.</div>
+</div>
+</div>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:0 0 12px">First: the mental model</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 14px">Right now you probably think of "a website" as one thing. This project is actually <strong>three separate things</strong> that talk to each other. Everything in this guide makes more sense once you can name them.</p>
+
+<div style="display:flex;flex-direction:column;gap:12px;margin:0 0 16px">
+<div style="display:flex;gap:16px;align-items:flex-start;background:#fff;border:1px solid #e5e5ea;border-radius:14px;padding:16px 18px" class="kb">
+<div style="flex:0 0 34px;height:34px;border-radius:50%;background:#0071e3;color:#fff;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12pt;font-weight:500">1</div>
+<div>
+<div style="font-size:12pt;font-weight:700;margin-bottom:3px">The client (front end)</div>
+<div style="font-size:11pt;line-height:1.55;color:#3a3a3c">The HTML/CSS you already understand — <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">Simfolio.dc.html</code> plus the <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">src/</code> folder. It draws buttons and charts. It knows nothing about stock prices or passwords; it asks for them.</div>
+</div>
+</div>
+<div style="display:flex;gap:16px;align-items:flex-start;background:#fff;border:1px solid #e5e5ea;border-radius:14px;padding:16px 18px" class="kb">
+<div style="flex:0 0 34px;height:34px;border-radius:50%;background:#0071e3;color:#fff;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12pt;font-weight:500">2</div>
+<div>
+<div style="font-size:12pt;font-weight:700;margin-bottom:3px">The server (back end)</div>
+<div style="font-size:11pt;line-height:1.55;color:#3a3a3c">The <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">server/</code> folder. A program written in JavaScript that sits running and waits to be asked questions: "who is this user?", "what does AAPL cost?", "buy 3 shares". It is exactly like a Python script that never exits — a <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">while True:</code> loop listening on a port.</div>
+</div>
+</div>
+<div style="display:flex;gap:16px;align-items:flex-start;background:#fff;border:1px solid #e5e5ea;border-radius:14px;padding:16px 18px" class="kb">
+<div style="flex:0 0 34px;height:34px;border-radius:50%;background:#0071e3;color:#fff;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12pt;font-weight:500">3</div>
+<div>
+<div style="font-size:12pt;font-weight:700;margin-bottom:3px">The database</div>
+<div style="font-size:11pt;line-height:1.55;color:#3a3a3c">A single file on your disk that remembers things after the server stops. Users, holdings, transactions. Without it, closing the terminal would erase every account.</div>
+</div>
+</div>
+</div>
+
+<div style="background:#fffbea;border:1px solid #f0dfa0;border-radius:14px;padding:16px 20px;margin:0 0 34px" class="kb">
+<div style="font-size:11pt;line-height:1.6"><strong>The one sentence to remember:</strong> the browser talks to the server over HTTP, and the server talks to the database in SQL. Your job in this guide is to make all three exist and find each other.</div>
+</div>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:0 0 12px;break-before:page">Step 1 — Install Node.js</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Node is the thing that runs JavaScript outside a browser. It is to JavaScript what the <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">python</code> command is to Python. You cannot run the server without it.</p>
+<ol style="font-size:11.5pt;line-height:1.62;margin:0 0 14px;padding-left:22px">
+<li style="margin-bottom:6px">Go to <a href="https://nodejs.org">nodejs.org</a> and download the <strong>LTS</strong> version.</li>
+<li style="margin-bottom:6px">Run the installer, accept every default.</li>
+<li>Restart your terminal afterwards, or the next step won't see it.</li>
+</ol>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 10px">Node comes with <strong>npm</strong>, its package manager — the equivalent of <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">pip</code> in Python or Maven in Java.</p>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px">Step 2 — Open a terminal and learn four commands</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 14px">On Mac, open <strong>Terminal</strong>. On Windows, open <strong>PowerShell</strong>. The terminal is just a way to run programs by typing their name instead of clicking them. Four commands cover everything you need here:</p>
+
+<table style="width:100%;border-collapse:collapse;font-size:11pt;margin:0 0 18px">
+<thead>
+<tr style="background:#f5f5f7">
+<th style="text-align:left;padding:9px 12px;font-weight:700;border-bottom:1px solid #d2d2d7;font-family:'JetBrains Mono',monospace;font-size:10.5pt">command</th>
+<th style="text-align:left;padding:9px 12px;font-weight:700;border-bottom:1px solid #d2d2d7">what it does</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10.5pt;white-space:nowrap">pwd</td><td style="padding:9px 12px;border-bottom:1px solid #eee;line-height:1.5">Prints which folder you are currently "standing in".</td></tr>
+<tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10.5pt;white-space:nowrap">ls</td><td style="padding:9px 12px;border-bottom:1px solid #eee;line-height:1.5">Lists the files here. On Windows PowerShell this also works.</td></tr>
+<tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10.5pt;white-space:nowrap">cd folder</td><td style="padding:9px 12px;border-bottom:1px solid #eee;line-height:1.5">Walk into a folder. <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">cd ..</code> walks back out one level.</td></tr>
+<tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10.5pt;white-space:nowrap">Ctrl + C</td><td style="padding:9px 12px;border-bottom:1px solid #eee;line-height:1.5">Not a command — the keystroke that <em>stops</em> a running program. You will need this constantly.</td></tr>
+</tbody>
+</table>
+
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 10px">Download this project to your computer, unzip it somewhere you can find (Desktop is fine), then in the terminal walk into it. Check you're in the right place:</p>
+<pre style="font-family:'JetBrains Mono',monospace;font-size:10.5pt;line-height:1.7;background:#1d1d1f;color:#f5f5f7;border-radius:12px;padding:16px 18px;margin:0 0 8px;overflow:hidden;white-space:pre-wrap"><span style="color:#7d8590">$ </span>cd Desktop/simfolio
+<span style="color:#7d8590">$ </span>ls</pre>
+<p style="font-size:11pt;line-height:1.6;color:#6e6e73;margin:0 0 8px">You should see <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">docs</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">server</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">src</code> and <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">Simfolio.dc.html</code> listed. If you don't, you're in the wrong folder — <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">cd ..</code> and try again.</p>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px">Step 3 — Install the server's dependencies</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">The server uses nine libraries other people wrote (a web framework, a password hasher, a database driver). They aren't in the project folder — only their <em>names</em> are, listed in <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">server/package.json</code>. This is the same idea as a <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">requirements.txt</code>. One command downloads them all:</p>
+<pre style="font-family:'JetBrains Mono',monospace;font-size:10.5pt;line-height:1.7;background:#1d1d1f;color:#f5f5f7;border-radius:12px;padding:16px 18px;margin:0 0 8px;overflow:hidden;white-space:pre-wrap"><span style="color:#7d8590">$ </span>cd server
+<span style="color:#7d8590">$ </span>npm install</pre>
+<p style="font-size:11pt;line-height:1.6;color:#6e6e73;margin:0 0 8px">This takes a minute or two and creates a large <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">node_modules</code> folder. Never edit anything inside it, and never commit it to Git. Warnings in yellow are normal; red <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">ERR!</code> lines are not.</p>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px">Step 4 — Get two free API keys</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 14px">Real stock prices have to come from somewhere. Two companies give them away for free at low volume, and this project uses one for each job. An <strong>API key</strong> is just a long password that identifies you to them — treat it like one.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 14px" class="kb">
+<div style="border:1px solid #e5e5ea;border-radius:14px;padding:16px 18px">
+<div style="font-size:12pt;font-weight:700;margin-bottom:4px">Finnhub</div>
+<div style="font-size:10.5pt;line-height:1.5;color:#3a3a3c;margin-bottom:8px">Live prices, company search, company profiles.</div>
+<a href="https://finnhub.io/register" style="font-family:'JetBrains Mono',monospace;font-size:10pt">finnhub.io/register</a>
+</div>
+<div style="border:1px solid #e5e5ea;border-radius:14px;padding:16px 18px">
+<div style="font-size:12pt;font-weight:700;margin-bottom:4px">Twelve Data</div>
+<div style="font-size:10.5pt;line-height:1.5;color:#3a3a3c;margin-bottom:8px">The price history behind the charts.</div>
+<a href="https://twelvedata.com/pricing" style="font-family:'JetBrains Mono',monospace;font-size:10pt">twelvedata.com</a>
+</div>
+</div>
+<p style="font-size:11pt;line-height:1.6;color:#6e6e73;margin:0 0 8px">Sign up with an email, confirm it, copy the key from your dashboard. Paste both somewhere temporary — you need them in the next step. If you'd rather skip this for now, leave them blank: the app falls back to simulated prices and everything else still works.</p>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px;break-before:page">Step 5 — Create your <span style="font-family:'JetBrains Mono',monospace;font-size:14pt">.env</span> file</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Secrets never go in code — they go in a file named <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">.env</code> that Git is told to ignore. The project ships a template. Copy it:</p>
+<pre style="font-family:'JetBrains Mono',monospace;font-size:10.5pt;line-height:1.7;background:#1d1d1f;color:#f5f5f7;border-radius:12px;padding:16px 18px;margin:0 0 14px;overflow:hidden;white-space:pre-wrap"><span style="color:#7d8590">$ </span>cp .env.example .env      <span style="color:#7d8590"># Mac
+</span><span style="color:#7d8590">$ </span>copy .env.example .env    <span style="color:#7d8590"># Windows</span></pre>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Open the new <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">server/.env</code> in any text editor and change exactly three lines. Leave everything else alone.</p>
+<pre style="font-family:'JetBrains Mono',monospace;font-size:10.5pt;line-height:1.75;background:#f5f5f7;color:#1d1d1f;border:1px solid #e5e5ea;border-radius:12px;padding:16px 18px;margin:0 0 8px;overflow:hidden;white-space:pre-wrap">JWT_SECRET=<span style="color:#0071e3">any-long-random-string-you-invent-right-here</span>
+FINNHUB_API_KEY=<span style="color:#0071e3">paste-your-finnhub-key</span>
+TWELVEDATA_API_KEY=<span style="color:#0071e3">paste-your-twelvedata-key</span></pre>
+<p style="font-size:11pt;line-height:1.6;color:#6e6e73;margin:0 0 8px">No quotes, no spaces around the <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">=</code>. <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">JWT_SECRET</code> is the key the server uses to sign login tokens — mash the keyboard for 40 characters. Notice <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">DATABASE_URL</code> is empty: that's deliberate, and it means "use the simple local database". Keep it empty.</p>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px">Step 6 — What a database actually is</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Stop before you run the next command, because this is the part you said you don't know, and it's ten minutes of reading well spent.</p>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">A relational database is a set of <strong>tables</strong>. A table is a spreadsheet with a fixed set of named columns and any number of rows. This project has five of them, and they look roughly like this:</p>
+
+<table style="width:100%;border-collapse:collapse;font-size:11pt;margin:0 0 16px">
+<thead>
+<tr style="background:#f5f5f7">
+<th style="text-align:left;padding:9px 12px;font-weight:700;border-bottom:1px solid #d2d2d7;font-family:'JetBrains Mono',monospace;font-size:10.5pt">table</th>
+<th style="text-align:left;padding:9px 12px;font-weight:700;border-bottom:1px solid #d2d2d7">one row means</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10.5pt">users</td><td style="padding:9px 12px;border-bottom:1px solid #eee;line-height:1.5">One person: email, hashed password, when they signed up.</td></tr>
+<tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10.5pt">accounts</td><td style="padding:9px 12px;border-bottom:1px solid #eee;line-height:1.5">One person's cash balance.</td></tr>
+<tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10.5pt">holdings</td><td style="padding:9px 12px;border-bottom:1px solid #eee;line-height:1.5">"This user owns 12 shares of AAPL at an average cost of $190.44."</td></tr>
+<tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10.5pt">transactions</td><td style="padding:9px 12px;border-bottom:1px solid #eee;line-height:1.5">One buy, sell, or deposit that happened, with a timestamp.</td></tr>
+<tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10.5pt">watchlist</td><td style="padding:9px 12px;border-bottom:1px solid #eee;line-height:1.5">"This user is following TSLA."</td></tr>
+</tbody>
+</table>
+
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Rows in different tables point at each other by ID — a holdings row stores a <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">user_id</code> rather than repeating the person's email. That pointing is the "relational" part, and it's the same instinct as an object holding a reference to another object in Java.</p>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 14px"><strong>SQL</strong> is the language you use to talk to it. It's small and reads like English. You do not need to write any today, but you should be able to recognise these four:</p>
+<pre style="font-family:'JetBrains Mono',monospace;font-size:10.5pt;line-height:1.8;background:#f5f5f7;color:#1d1d1f;border:1px solid #e5e5ea;border-radius:12px;padding:16px 18px;margin:0 0 14px;overflow:hidden;white-space:pre-wrap"><span style="color:#8250df">SELECT</span> * <span style="color:#8250df">FROM</span> holdings <span style="color:#8250df">WHERE</span> user_id = 1;   <span style="color:#7d8590">-- read rows
+</span><span style="color:#8250df">INSERT INTO</span> watchlist (user_id, symbol) <span style="color:#8250df">VALUES</span> (1, 'TSLA');
+<span style="color:#8250df">UPDATE</span> accounts <span style="color:#8250df">SET</span> cash_cents = 500000 <span style="color:#8250df">WHERE</span> id = 1;
+<span style="color:#8250df">DELETE FROM</span> watchlist <span style="color:#8250df">WHERE</span> symbol = 'TSLA';</pre>
+
+<div style="background:#f0f7ff;border:1px solid #cbe2fb;border-radius:14px;padding:16px 20px;margin:0 0 14px" class="kb">
+<div style="font-size:11pt;line-height:1.6"><strong>Two words in the next step.</strong> <em>Migrate</em> means "create the empty tables" — it runs the SQL that defines the shape of the database. <em>Seed</em> means "put some starter rows in", so you have a demo account to log into instead of an empty app. You run migrate once; you can re-run seed any time.</div>
+</div>
+<p style="font-size:11pt;line-height:1.6;color:#6e6e73;margin:0 0 8px">Your database will be a single file at <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">server/data/simfolio.db</code>. That's SQLite — a whole relational database in one file, no separate program to install. It's real SQL, and it is the right choice while you're learning. Postgres (the industrial version, a server of its own) is already supported for later; that's what <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">DATABASE_URL</code> is for.</p>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px;break-before:page">Step 7 — Build the database</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">From inside the <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">server</code> folder:</p>
+<pre style="font-family:'JetBrains Mono',monospace;font-size:10.5pt;line-height:1.7;background:#1d1d1f;color:#f5f5f7;border-radius:12px;padding:16px 18px;margin:0 0 8px;overflow:hidden;white-space:pre-wrap"><span style="color:#7d8590">$ </span>npm run migrate
+<span style="color:#7d8590">$ </span>npm run seed</pre>
+<p style="font-size:11pt;line-height:1.6;color:#6e6e73;margin:0 0 8px">Each should print a short list of what it did and then exit back to your prompt. If migrate prints an error mentioning <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">better-sqlite3</code>, step 3 didn't finish — run <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">npm install</code> again and read its output.</p>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px">Step 8 — Start the server</h2>
+<pre style="font-family:'JetBrains Mono',monospace;font-size:10.5pt;line-height:1.7;background:#1d1d1f;color:#f5f5f7;border-radius:12px;padding:16px 18px;margin:0 0 12px;overflow:hidden;white-space:pre-wrap"><span style="color:#7d8590">$ </span>npm run dev</pre>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">This one <strong>does not exit</strong>. It prints something like <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">listening on http://localhost:4000</code> and then sits there. That's correct — it's the server waiting for questions. Leave this terminal tab open and untouched for as long as you're working. Open a <em>second</em> tab for anything else.</p>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Check it's alive: open <a href="http://localhost:4000/health">localhost:4000/health</a> in your browser. You should see a small blob of JSON. That blob is the entire point of this step — it means your server is running and reachable.</p>
+<div style="background:#f5f5f7;border-radius:14px;padding:16px 20px;margin:0 0 14px" class="kb">
+<div style="font-size:11pt;line-height:1.6"><strong>Vocabulary:</strong> <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">localhost</code> means "this computer". <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">:4000</code> is the port — one computer can run many servers, and the port number is how you say which one you mean. Nobody else on the internet can reach it yet.</div>
+</div>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px">Step 9 — Open the app and log in</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Open <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">Simfolio.dc.html</code>. It checks whether a server is answering on port 4000: if yes it uses it, if no it quietly falls back to running everything in the browser. So if your prices and portfolio survive a hard refresh, you're genuinely talking to the server and the database.</p>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Sign up with any email and password. Then walk the whole loop once, deliberately: deposit cash → search a symbol → buy a few shares → check Holdings → check Activity → sell some → refresh the page and confirm nothing was lost.</p>
+<p style="font-size:11pt;line-height:1.6;color:#6e6e73;margin:0 0 8px">That last refresh is the real test. If your holdings vanish, the client is in browser-only mode and never reached the server — go back to step 8.</p>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px;break-before:page">When it breaks — and it will</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 14px">This is the actual skill. An error message is not a wall; it's a sentence telling you what happened and where. Read the <em>first</em> few lines of a stack trace and ignore the rest — the top is your code, the bottom is libraries. Here are the failures you are most likely to hit:</p>
+
+<table style="width:100%;border-collapse:collapse;font-size:11pt;margin:0 0 18px">
+<thead>
+<tr style="background:#f5f5f7">
+<th style="text-align:left;padding:9px 12px;font-weight:700;border-bottom:1px solid #d2d2d7;width:40%">Message</th>
+<th style="text-align:left;padding:9px 12px;font-weight:700;border-bottom:1px solid #d2d2d7">What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10pt;line-height:1.5">command not found: npm</td><td style="padding:10px 12px;border-bottom:1px solid #eee;line-height:1.5">Node isn't installed, or you didn't restart the terminal after installing it.</td></tr>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10pt;line-height:1.5">EADDRINUSE :4000</td><td style="padding:10px 12px;border-bottom:1px solid #eee;line-height:1.5">A server is already running on that port — probably one you started earlier and forgot. Find that tab and press Ctrl+C.</td></tr>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10pt;line-height:1.5">Cannot find module 'express'</td><td style="padding:10px 12px;border-bottom:1px solid #eee;line-height:1.5">You're not in the <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">server</code> folder, or <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">npm install</code> didn't complete.</td></tr>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10pt;line-height:1.5">no such table: users</td><td style="padding:10px 12px;border-bottom:1px solid #eee;line-height:1.5">You skipped <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">npm run migrate</code>.</td></tr>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10pt;line-height:1.5">401 Unauthorized</td><td style="padding:10px 12px;border-bottom:1px solid #eee;line-height:1.5">Your login token is missing or expired. Log out and back in.</td></tr>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;font-size:10pt;line-height:1.5">429 Too Many Requests</td><td style="padding:10px 12px;border-bottom:1px solid #eee;line-height:1.5">You hit the free tier's rate limit at Finnhub or Twelve Data. Wait a minute.</td></tr>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #eee;line-height:1.5">Prices show but charts are empty</td><td style="padding:10px 12px;border-bottom:1px solid #eee;line-height:1.5">Twelve Data key is missing or wrong. Quotes and history come from different vendors.</td></tr>
+</tbody>
+</table>
+
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Two habits worth forming now. First: <strong>the browser console</strong> — right-click the page, Inspect, Console tab. Front-end errors appear there and nowhere else. Its Network tab shows every request the page made to your server and what came back, which answers "is this the client's fault or the server's?" in about five seconds.</p>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Second: <strong>look in your database</strong>. Download <a href="https://sqlitebrowser.org">DB Browser for SQLite</a>, open <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">server/data/simfolio.db</code>, and click through the tables after you place a trade. Watching a row appear the moment you press Buy is the fastest way to make databases stop feeling abstract.</p>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px">After it works</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 14px">Don't jump to deploying. Do these in order — each one teaches the thing the next one assumes.</p>
+<div style="display:flex;flex-direction:column;gap:10px;margin:0 0 16px">
+<div style="display:flex;gap:14px;align-items:baseline;border-bottom:1px solid #eee;padding-bottom:10px" class="kb"><div style="flex:0 0 22px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500">01</div><div style="font-size:11.5pt;line-height:1.55"><strong>Break it on purpose.</strong> Change a label in the HTML. Change the starting cash in <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">.env</code>. Delete the <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">.db</code> file and re-run migrate and seed. Nothing here is precious, and you learn the shape of a system by poking it.</div></div>
+<div style="display:flex;gap:14px;align-items:baseline;border-bottom:1px solid #eee;padding-bottom:10px" class="kb"><div style="flex:0 0 22px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500">02</div><div style="font-size:11.5pt;line-height:1.55"><strong>Follow one feature end to end.</strong> Pick "buy". Find the button in the HTML, the method it calls, the request that goes out, the route on the server, the use-case class, the SQL. One trace through all six layers is worth a week of tutorials.</div></div>
+<div style="display:flex;gap:14px;align-items:baseline;border-bottom:1px solid #eee;padding-bottom:10px" class="kb"><div style="flex:0 0 22px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500">03</div><div style="font-size:11.5pt;line-height:1.55"><strong>Run the tests.</strong> <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">npm test</code> in the server folder. Read <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">test/portfolio.test.js</code> — it's the most readable file in the project and it documents the trading rules.</div></div>
+<div style="display:flex;gap:14px;align-items:baseline;border-bottom:1px solid #eee;padding-bottom:10px" class="kb"><div style="flex:0 0 22px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500">04</div><div style="font-size:11.5pt;line-height:1.55"><strong>Learn Git.</strong> Then replay the commit history in <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">docs/GIT-WORKFLOW.md</code> so the repo reads like fifteen pieces of real work instead of one dump. For getting hired this matters more than any feature you could add.</div></div>
+<div style="display:flex;gap:14px;align-items:baseline" class="kb"><div style="flex:0 0 22px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500">05</div><div style="font-size:11.5pt;line-height:1.55"><strong>Then deploy.</strong> Server to Render, client to Vercel, and swap SQLite for Postgres — which is one environment variable, because both sit behind the same interface.</div></div>
+</div>
+
+<div style="border-top:3px solid #1d1d1f;padding-top:16px;margin-top:26px" class="kb">
+<div style="font-size:11pt;line-height:1.6;color:#6e6e73">Further reading in this project: <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">docs/STACK.md</code> — every tool and why it's here. <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">docs/ARCHITECTURE.md</code> — how the layers fit. <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">docs/API.md</code> — every endpoint. Read STACK first; it's the one that makes the vocabulary click.</div>
+</div>
+
+</doc-page>
+</x-dc>
+</body>
+</html>

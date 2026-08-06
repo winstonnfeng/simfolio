@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+doc-page:not(:defined){visibility:hidden}
+body{margin:0;font-family:Manrope,system-ui,sans-serif;color:#1d1d1f}
+a{color:#0071e3;text-decoration:none;border-bottom:1px solid rgba(0,113,227,.3)}
+a:hover{color:#0058b0;border-bottom-color:#0058b0}
+pre{break-inside:avoid}
+.kb{break-inside:avoid}
+</style>
+<script src="./doc-page.js"></script>
+</helmet>
+<doc-page margin="0.8in">
+
+<div style="display:flex;flex-direction:column;gap:6px;padding-bottom:22px;border-bottom:3px solid #1d1d1f;margin-bottom:34px">
+<div style="font-family:'JetBrains Mono',monospace;font-size:10.5pt;letter-spacing:.14em;text-transform:uppercase;color:#0071e3;font-weight:500">Simfolio — Go live</div>
+<h1 style="margin:0;font-size:30pt;font-weight:800;letter-spacing:-.02em;line-height:1.05">Path A, in depth</h1>
+<p style="margin:8px 0 0;font-size:12pt;line-height:1.5;color:#6e6e73;max-width:46em">Client on Cloudflare Pages, server on Render, Postgres on Neon. Three free accounts, no code rewritten. Read the whole thing once before you start clicking — the order matters, and each service needs a value the previous one produced.</p>
+</div>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:0 0 12px">Part 0 — Before you touch a dashboard</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Four accounts, all free, all sign-up-with-email. Get them first; every later step asks for something one of them gave you.</p>
+<table style="width:100%;border-collapse:collapse;font-size:10.5pt;margin:0 0 14px">
+<thead>
+<tr style="background:#f5f5f7">
+<th style="text-align:left;padding:9px 12px;font-weight:700;border-bottom:1px solid #d2d2d7">Account</th>
+<th style="text-align:left;padding:9px 12px;font-weight:700;border-bottom:1px solid #d2d2d7">What you copy out of it</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600">GitHub</td><td style="padding:8px 12px;border-bottom:1px solid #eee;line-height:1.5">Nothing to copy — but your code has to live there. See the next section.</td></tr>
+<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600"><a href="https://finnhub.io/register">Finnhub</a></td><td style="padding:8px 12px;border-bottom:1px solid #eee;line-height:1.5">API key — live quotes, search, the US + Canadian symbol universe</td></tr>
+<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600"><a href="https://twelvedata.com/pricing">Twelve Data</a></td><td style="padding:8px 12px;border-bottom:1px solid #eee;line-height:1.5">API key — the price history behind every chart</td></tr>
+<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600"><a href="https://neon.tech">Neon</a> + <a href="https://render.com">Render</a> + <a href="https://pages.cloudflare.com">Cloudflare</a></td><td style="padding:8px 12px;border-bottom:1px solid #eee;line-height:1.5">The three hosts below. Sign in with GitHub for all three.</td></tr>
+</tbody>
+</table>
+<div style="background:#fffbea;border:1px solid #f0dfa0;border-radius:14px;padding:16px 20px;margin:0 0 32px" class="kb">
+<div style="font-size:11pt;line-height:1.6"><strong>Without the two API keys Simfolio still runs</strong> — it falls back to simulated prices, and everything else works identically. With them you get real quotes. That fallback is a design choice, not a bug: it is why the app boots on a laptop with no configuration at all.</div>
+</div>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:0 0 12px">The shape of it</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 16px">On your laptop all three pieces live in one place and find each other over <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">localhost</code>. Deployed, they sit on three different companies' computers and find each other over the public internet by hostname. That's the entire difference. Same code, longer wires.</p>
+
+<div style="background:#f5f5f7;border-radius:16px;padding:24px;margin:0 0 18px" class="kb">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:16px;align-items:center">
+<div style="flex:0 0 130px;font-family:'JetBrains Mono',monospace;font-size:9.5pt;letter-spacing:.08em;text-transform:uppercase;color:#6e6e73">Browser</div>
+<div style="flex:1;background:#fff;border-radius:10px;padding:12px 16px;font-size:11pt;line-height:1.4">Someone's phone or laptop, anywhere</div>
+</div>
+<div style="display:flex;gap:16px;align-items:center">
+<div style="flex:0 0 130px;font-family:'JetBrains Mono',monospace;font-size:9.5pt;color:#0071e3">↓ downloads HTML</div>
+<div style="flex:1;height:1px;background:#d2d2d7"></div>
+</div>
+<div style="display:flex;gap:16px;align-items:center">
+<div style="flex:0 0 130px;font-family:'JetBrains Mono',monospace;font-size:9.5pt;letter-spacing:.08em;text-transform:uppercase;color:#6e6e73">Cloudflare Pages</div>
+<div style="flex:1;background:#fff;border-radius:10px;padding:12px 16px;font-size:11pt;line-height:1.4">Your client files. <span style="color:#6e6e73">Hands out HTML, CSS, JS. Holds no data, runs no logic.</span></div>
+</div>
+<div style="display:flex;gap:16px;align-items:center">
+<div style="flex:0 0 130px;font-family:'JetBrains Mono',monospace;font-size:9.5pt;color:#0071e3">↓ HTTPS / JSON</div>
+<div style="flex:1;height:1px;background:#d2d2d7"></div>
+</div>
+<div style="display:flex;gap:16px;align-items:center">
+<div style="flex:0 0 130px;font-family:'JetBrains Mono',monospace;font-size:9.5pt;letter-spacing:.08em;text-transform:uppercase;color:#6e6e73">Render</div>
+<div style="flex:1;background:#fff;border-radius:10px;padding:12px 16px;font-size:11pt;line-height:1.4">Your Express server. <span style="color:#6e6e73">Checks passwords, calls Finnhub, executes orders.</span></div>
+</div>
+<div style="display:flex;gap:16px;align-items:center">
+<div style="flex:0 0 130px;font-family:'JetBrains Mono',monospace;font-size:9.5pt;color:#0071e3">↓ SQL over TLS</div>
+<div style="flex:1;height:1px;background:#d2d2d7"></div>
+</div>
+<div style="display:flex;gap:16px;align-items:center">
+<div style="flex:0 0 130px;font-family:'JetBrains Mono',monospace;font-size:9.5pt;letter-spacing:.08em;text-transform:uppercase;color:#6e6e73">Neon</div>
+<div style="flex:1;background:#fff;border-radius:10px;padding:12px 16px;font-size:11pt;line-height:1.4">Postgres. <span style="color:#6e6e73">The only piece that remembers anything.</span></div>
+</div>
+</div>
+</div>
+
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Note what <em>doesn't</em> happen: the browser never touches the database. It couldn't — the database password lives only on Render, and a browser can't be trusted with it. Every read and write goes through your server, which is exactly why the server exists.</p>
+
+<div style="background:#fffbea;border:1px solid #f0dfa0;border-radius:14px;padding:16px 20px;margin:0 0 32px" class="kb">
+<div style="font-size:11pt;line-height:1.6"><strong>Why three companies instead of one?</strong> Because these are three genuinely different jobs. Serving static files wants a global CDN. Running Node wants a long-lived process. Storing data wants durable disk and backups. Platforms that do all three exist, but they're worse at each. Splitting them is normal and it's what the job looks like.</div>
+</div>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:0 0 12px;break-before:page">Concept: environment variables</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">You already met these in your <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">.env</code> file. Understand them properly now, because deployment is mostly just setting them.</p>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">An environment variable is a named value the operating system hands your program when it starts. Your code reads it instead of hard-coding the value:</p>
+<pre style="font-family:'JetBrains Mono',monospace;font-size:10.5pt;line-height:1.75;background:#f5f5f7;color:#1d1d1f;border:1px solid #e5e5ea;border-radius:12px;padding:16px 18px;margin:0 0 12px;overflow:hidden;white-space:pre-wrap">const url = process.env.DATABASE_URL;   <span style="color:#7d8590">// not a hard-coded connection string
+</span></pre>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">This is what lets the identical code run in two places with different behaviour. On your laptop the values come from <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">.env</code>. On Render you type them into a form in their dashboard and Render injects them. The <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">.env</code> file itself is never uploaded — it's in <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">.gitignore</code>, and if you ever commit one, treat every secret in it as burned and rotate them.</p>
+<p style="font-size:11pt;line-height:1.6;color:#6e6e73;margin:0 0 8px">In your project, <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">server/src/config/loadConfig.js</code> is the single file that reads these. Everything else receives values. That's the pattern — one door in.</p>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px">Push to GitHub before anything else</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Render and Cloudflare both deploy <em>by watching a Git repository</em>. You push a commit; they notice and rebuild. There's no "upload my folder" button worth using — GitHub is the delivery mechanism, not a formality.</p>
+<p style="font-size:11pt;line-height:1.6;color:#6e6e73;margin:0 0 8px">Before pushing, confirm <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">.gitignore</code> lists <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">node_modules</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">.env</code>, and <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">data/</code>. Then check what you're about to send with <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">git status</code> and actually read the list. A committed <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">.env</code> means every secret in it is burned.</p>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 14px">Part 1 — Neon: the database</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 14px">Do this first, because Render needs its connection string.</p>
+
+<div style="display:flex;flex-direction:column;gap:12px;margin:0 0 16px">
+<div style="display:flex;gap:14px;align-items:flex-start" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500;padding-top:1px">01</div><div style="font-size:11.5pt;line-height:1.58">Sign up at <a href="https://neon.tech">neon.tech</a>. Create a project; name the database <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">simfolio</code>. Pick the region closest to where you'll put the server — every query pays that round trip.</div></div>
+<div style="display:flex;gap:14px;align-items:flex-start" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500;padding-top:1px">02</div><div style="font-size:11.5pt;line-height:1.58">Copy the connection string it shows you. It looks like the line below. This single string is host, port, user, password and database name in one — and it is a password. Never commit it, never paste it in a screenshot.</div></div>
+</div>
+<pre style="font-family:'JetBrains Mono',monospace;font-size:10pt;line-height:1.7;background:#1d1d1f;color:#f5f5f7;border-radius:12px;padding:16px 18px;margin:0 0 16px;overflow:hidden;white-space:pre-wrap">postgres://alex:AbC123xyz@ep-quiet-moon-12345.us-east-2.aws.neon.tech/simfolio?sslmode=require</pre>
+
+<div style="display:flex;flex-direction:column;gap:12px;margin:0 0 16px">
+<div style="display:flex;gap:14px;align-items:flex-start" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500;padding-top:1px">03</div><div style="font-size:11.5pt;line-height:1.58"><strong>Create the tables in it.</strong> Your new Neon database is completely empty — migrations you ran locally built tables in your local SQLite file and know nothing about this one. Run them against Neon from your laptop, once:</div></div>
+</div>
+<pre style="font-family:'JetBrains Mono',monospace;font-size:10.5pt;line-height:1.7;background:#1d1d1f;color:#f5f5f7;border-radius:12px;padding:16px 18px;margin:0 0 10px;overflow:hidden;white-space:pre-wrap"><span style="color:#7d8590">$ </span>cd server
+<span style="color:#7d8590">$ </span>DATABASE_URL="postgres://...your-neon-string..." PG_SSL=true npm run migrate</pre>
+<p style="font-size:11pt;line-height:1.6;color:#6e6e73;margin:0 0 12px">Putting the variable before the command sets it for that one command only — your <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">.env</code> is untouched, so your local SQLite setup keeps working. On Windows PowerShell it's <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">$env:DATABASE_URL="..."</code> on its own line first. This is the moment your code path switches: with <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">DATABASE_URL</code> set, the container loads the Postgres repositories instead of the SQLite ones — same interfaces, different adapter.</p>
+<p style="font-size:11pt;line-height:1.6;color:#6e6e73;margin:0 0 8px">Skip <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">npm run seed</code> here unless you want the demo account public. Real signups will create real rows.</p>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 14px;break-before:page">Part 2 — Render: the server</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 14px">Render runs your Express app as a long-lived process, which is exactly what it needs (and exactly what Cloudflare Workers can't give it).</p>
+
+<div style="display:flex;flex-direction:column;gap:12px;margin:0 0 16px">
+<div style="display:flex;gap:14px;align-items:flex-start" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500;padding-top:1px">01</div><div style="font-size:11.5pt;line-height:1.58">At <a href="https://render.com">render.com</a>, New → <strong>Web Service</strong>, connect your GitHub repo.</div></div>
+<div style="display:flex;gap:14px;align-items:flex-start" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500;padding-top:1px">02</div><div style="font-size:11.5pt;line-height:1.58">Set <strong>Root Directory</strong> to <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">server</code>. This is the step people miss — your repo has the client at the top level, and without this Render looks for <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">package.json</code> in the wrong folder and fails immediately.</div></div>
+<div style="display:flex;gap:14px;align-items:flex-start" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500;padding-top:1px">03</div><div style="font-size:11.5pt;line-height:1.58">Build command <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">npm install</code>, start command <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">npm start</code>. Build runs once per deploy; start is the process that keeps running. Use <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">npm start</code>, not <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">npm run dev</code> — dev restarts on file changes, which is meaningless and wasteful in production.</div></div>
+<div style="display:flex;gap:14px;align-items:flex-start" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500;padding-top:1px">04</div><div style="font-size:11.5pt;line-height:1.58">Add the environment variables:</div></div>
+</div>
+
+<table style="width:100%;border-collapse:collapse;font-size:10.5pt;margin:0 0 14px">
+<thead>
+<tr style="background:#f5f5f7">
+<th style="text-align:left;padding:9px 12px;font-weight:700;border-bottom:1px solid #d2d2d7;font-family:'JetBrains Mono',monospace">variable</th>
+<th style="text-align:left;padding:9px 12px;font-weight:700;border-bottom:1px solid #d2d2d7">value</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;white-space:nowrap">DATABASE_URL</td><td style="padding:8px 12px;border-bottom:1px solid #eee;line-height:1.5">Your Neon string from Part 1</td></tr>
+<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;white-space:nowrap">PG_SSL</td><td style="padding:8px 12px;border-bottom:1px solid #eee;line-height:1.5"><code style="font-family:'JetBrains Mono',monospace">true</code> — Neon refuses unencrypted connections</td></tr>
+<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;white-space:nowrap">JWT_SECRET</td><td style="padding:8px 12px;border-bottom:1px solid #eee;line-height:1.5">A <em>new</em> long random string — not the one from your laptop</td></tr>
+<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;white-space:nowrap">FINNHUB_API_KEY</td><td style="padding:8px 12px;border-bottom:1px solid #eee;line-height:1.5">Same key as local</td></tr>
+<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;white-space:nowrap">TWELVEDATA_API_KEY</td><td style="padding:8px 12px;border-bottom:1px solid #eee;line-height:1.5">Same key as local</td></tr>
+<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;white-space:nowrap">NODE_ENV</td><td style="padding:8px 12px;border-bottom:1px solid #eee;line-height:1.5"><code style="font-family:'JetBrains Mono',monospace">production</code></td></tr>
+<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-family:'JetBrains Mono',monospace;white-space:nowrap">CORS_ORIGIN</td><td style="padding:8px 12px;border-bottom:1px solid #eee;line-height:1.5">Leave blank for now — you don't have the Pages URL yet. You'll come back.</td></tr>
+</tbody>
+</table>
+<p style="font-size:11pt;line-height:1.6;color:#6e6e73;margin:0 0 12px">Don't set <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">PORT</code>. Render assigns one and passes it in; your code already reads it.</p>
+
+<div style="display:flex;flex-direction:column;gap:12px;margin:0 0 16px">
+<div style="display:flex;gap:14px;align-items:flex-start" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500;padding-top:1px">05</div><div style="font-size:11.5pt;line-height:1.58">Deploy, then <strong>watch the log stream</strong>. It's the same output you saw in your terminal. When it reaches "listening", open <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">https://your-service.onrender.com/health</code> and confirm you get JSON back. Do not move on until you do.</div></div>
+</div>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 14px;break-before:page">Part 3 — Cloudflare Pages: the client</h2>
+
+<div style="display:flex;flex-direction:column;gap:12px;margin:0 0 16px">
+<div style="display:flex;gap:14px;align-items:flex-start" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500;padding-top:1px">01</div><div style="font-size:11.5pt;line-height:1.58"><strong>Point the client at Render first.</strong> Right now it's hard-coded to your laptop. In <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">Simfolio.dc.html</code> the <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">apiBaseUrl</code> prop defaults to <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">http://localhost:4000</code> — change that default and the fallback beside it to your Render URL, and change <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">DEFAULT_BASE_URL</code> in <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">src/gateways/resolveGateway.js</code> to match. Commit and push.</div></div>
+<div style="display:flex;gap:14px;align-items:flex-start" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500;padding-top:1px">02</div><div style="font-size:11.5pt;line-height:1.58">In the Cloudflare dashboard: Workers &amp; Pages → Create → Pages → connect your repo. Build command: <strong>leave empty</strong>. Build output directory: <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">/</code>. There's genuinely nothing to compile — that's the upside of no bundler.</div></div>
+<div style="display:flex;gap:14px;align-items:flex-start" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500;padding-top:1px">03</div><div style="font-size:11.5pt;line-height:1.58">Deploy. You get a URL like <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">simfolio.pages.dev</code>.</div></div>
+<div style="display:flex;gap:14px;align-items:flex-start" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500;padding-top:1px">04</div><div style="font-size:11.5pt;line-height:1.58"><strong>Go back to Render</strong> and set <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">CORS_ORIGIN</code> to that exact URL — <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">https://simfolio.pages.dev</code>, https, no trailing slash. Render restarts. Now the circle is closed.</div></div>
+</div>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px">Concept: CORS, since it will bite you</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Browsers enforce a rule: JavaScript loaded from one domain may not read responses from a different domain unless that other domain explicitly permits it. It's what stops a malicious page from quietly calling your bank's API using your logged-in session.</p>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 12px">Locally you never noticed, because client and server were both <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">localhost</code>. Deployed they're on different domains, so your server has to say "requests from <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">simfolio.pages.dev</code> are fine" — which is precisely what <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">CORS_ORIGIN</code> does.</p>
+<p style="font-size:11pt;line-height:1.6;color:#6e6e73;margin:0 0 8px">The symptom is unmistakable once you've seen it: the app loads and looks fine, every request fails, and the browser console says something about <em>blocked by CORS policy</em>. Nine times in ten the fix is a typo in <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">CORS_ORIGIN</code> — <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">http</code> instead of <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">https</code>, or a trailing slash. Resist setting it to <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">*</code>; you'd be turning off the protection rather than configuring it.</p>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px;break-before:page">Verify in order</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 14px">Check each link in the chain separately, nearest to the data first. When something's broken this tells you <em>which</em> of the three services to look at, instead of guessing.</p>
+<div style="display:flex;flex-direction:column;gap:10px;margin:0 0 18px">
+<div style="display:flex;gap:14px;align-items:baseline;border-bottom:1px solid #eee;padding-bottom:10px" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500">01</div><div style="font-size:11.5pt;line-height:1.55">Neon's dashboard lists a <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">users</code> table. → migrations landed. (You will see eight in total — the five that hold your data, plus <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">symbols</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">app_meta</code> and the migration runner's own bookkeeping table.)</div></div>
+<div style="display:flex;gap:14px;align-items:baseline;border-bottom:1px solid #eee;padding-bottom:10px" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500">02</div><div style="font-size:11.5pt;line-height:1.55"><code style="font-family:'JetBrains Mono',monospace;font-size:10pt">/health</code> on the Render URL returns JSON. → server is up and reached its database.</div></div>
+<div style="display:flex;gap:14px;align-items:baseline;border-bottom:1px solid #eee;padding-bottom:10px" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500">03</div><div style="font-size:11.5pt;line-height:1.55">The Pages URL loads and looks right. → client deployed.</div></div>
+<div style="display:flex;gap:14px;align-items:baseline;border-bottom:1px solid #eee;padding-bottom:10px" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500">04</div><div style="font-size:11.5pt;line-height:1.55">Sign up on the live site. → client reached server, server wrote to Postgres, CORS is right. This one test covers the whole chain.</div></div>
+<div style="display:flex;gap:14px;align-items:baseline" class="kb"><div style="flex:0 0 24px;font-family:'JetBrains Mono',monospace;font-size:11pt;color:#0071e3;font-weight:500">05</div><div style="font-size:11.5pt;line-height:1.55">Buy something, then open the site on your phone and log in. Your holdings are there. → that's real persistence on a real database, and the moment the whole thing stops feeling theoretical.</div></div>
+</div>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px">What free tiers actually cost you</h2>
+<table style="width:100%;border-collapse:collapse;font-size:11pt;margin:0 0 16px">
+<thead>
+<tr style="background:#f5f5f7">
+<th style="text-align:left;padding:9px 12px;font-weight:700;border-bottom:1px solid #d2d2d7">Service</th>
+<th style="text-align:left;padding:9px 12px;font-weight:700;border-bottom:1px solid #d2d2d7">The catch</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-weight:600">Render</td><td style="padding:9px 12px;border-bottom:1px solid #eee;line-height:1.5">Sleeps after ~15 minutes idle. The next visitor waits up to 50 seconds for a cold start. Put a line in your README so reviewers don't think it's broken.</td></tr>
+<tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-weight:600">Neon</td><td style="padding:9px 12px;border-bottom:1px solid #eee;line-height:1.5">Also suspends when idle, but wakes in a second or two. Storage limit is far beyond anything you'll hit.</td></tr>
+<tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-weight:600">Cloudflare Pages</td><td style="padding:9px 12px;border-bottom:1px solid #eee;line-height:1.5">Effectively no catch. Static files, unlimited bandwidth, always warm.</td></tr>
+<tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-weight:600">Finnhub / Twelve Data</td><td style="padding:9px 12px;border-bottom:1px solid #eee;line-height:1.5">Rate limits are now shared across <em>all</em> your visitors, not just you. Your server's quote cache is what makes this survivable.</td></tr>
+</tbody>
+</table>
+
+<h2 style="font-size:16pt;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px">Two things to fix once it's live</h2>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 10px"><strong>The live price stream.</strong> Your server holds one WebSocket to Finnhub and fans it out. Render's free tier runs a single instance, so this works — but it will not survive scaling to two, because each instance would open its own upstream socket and hold its own subscriber list. That's the Redis note in <code style="font-family:'JetBrains Mono',monospace;font-size:10pt;background:#f5f5f7;padding:1px 5px;border-radius:4px">docs/STACK.md</code>, and it's a real answer to have ready if an interviewer asks how you'd scale this.</p>
+<p style="font-size:11.5pt;line-height:1.62;margin:0 0 10px"><strong>Tokens in localStorage.</strong> Fine for a portfolio project, and worth knowing why it isn't fine in general: any script running on your page can read localStorage, so an XSS bug becomes a stolen session. The production answer is a refresh token in an httpOnly cookie. Being able to explain that trade-off is worth more than having silently done it.</p>
+
+<div style="border-top:3px solid #1d1d1f;padding-top:16px;margin-top:26px" class="kb">
+<div style="font-size:11pt;line-height:1.6;color:#6e6e73">Every deploy from here is <code style="font-family:'JetBrains Mono',monospace;font-size:10pt">git push</code>. Both platforms watch the repo and rebuild on their own. If a deploy breaks the site, the fastest fix is always to roll back to the previous deploy in the dashboard, then debug locally — never debug in production while it's down.</div>
+</div>
+
+</doc-page>
+</x-dc>
+</body>
+</html>
